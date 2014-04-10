@@ -93,11 +93,16 @@ public class ContentServer {
 	
 	public void handleIncomeMessage(ObjectRequest oRequest) {
 		RequestType requestType = oRequest.getRequestType();
-		switch (requestType) 
-		case :
-		if (oRequest.getRequestType() == RequestType.CLIENT_GET_OBJECT) {
-			handleClientGetRequest();
-		} else if ()
+		switch (requestType) { 
+			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
+			case CLIENT_PUT_OBJECT :handleClientPutRequest(); break;
+			default : break;
+		}
+	}
+
+	private void handleClientPutRequest() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void handleClientGetRequest() {
