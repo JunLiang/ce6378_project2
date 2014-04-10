@@ -6,6 +6,7 @@ import java.io.ObjectInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ContentServer {
@@ -18,7 +19,10 @@ public class ContentServer {
 	private ConcurrentHashMap<Long, ContentObject> secondaryObjects;
 	private ConcurrentHashMap<Long, ContentObject> tertiaryObjects;
 	
-	
+	//This is used to store the socket of other servers.
+	//These sockets should be available at all time
+	//When a server simulates failure
+	private TreeMap<Integer, Socket> serverSockets; 
 	
 	class ListenerThread implements Runnable {
 		
@@ -143,6 +147,14 @@ public class ContentServer {
 	public void setTertiaryObjects(
 			ConcurrentHashMap<Long, ContentObject> tertiaryObjects) {
 		this.tertiaryObjects = tertiaryObjects;
+	}
+
+	public TreeMap<Integer, Socket> getServerSockets() {
+		return serverSockets;
+	}
+
+	public void setServerSockets(TreeMap<Integer, Socket> serverSockets) {
+		this.serverSockets = serverSockets;
 	}
 		
 
