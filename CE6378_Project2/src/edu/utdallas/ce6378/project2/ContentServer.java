@@ -3,8 +3,10 @@ package edu.utdallas.ce6378.project2;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,6 +35,26 @@ public class ContentServer {
 	private ServerStatus serverStatus;
 	
 	private NodeConfiguration config;
+	
+	
+	private TreeMap<Integer,ObjectOutputStream> outboundPipes;
+	private TreeMap<Integer, Socket> outboundSockets;
+	
+	public ContentServer(NodeConfiguration localNodeConfig) {
+		// TODO Auto-generated constructor stub
+		config = localNodeConfig;
+		logicTimestamp = new VectorTimestamp();		
+		primaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
+		secondaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
+		tertiaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
+		serverSockets = new TreeMap<Integer, Socket> ();
+		outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
+		outboundSockets = new TreeMap<Integer, Socket>();
+	}
+	
+	public ContentServer () {
+
+	}
 
 	public Integer getNodeId() {
 		return nodeId;
@@ -92,20 +114,7 @@ public class ContentServer {
 	public void setServerStatus(ServerStatus serverStatus) {
 		this.serverStatus = serverStatus;
 	}
-	
-	public ContentServer () {
-		logicTimestamp = new VectorTimestamp();		
-		primaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
-		secondaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
-		tertiaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
-		serverSockets = new TreeMap<Integer, Socket> ();
-	}
-	
-	public ContentServer(NodeConfiguration localNodeConfig) {
-		// TODO Auto-generated constructor stub
-		config = localNodeConfig;
-	}
-
+		
 	public synchronized void tickMyClock() {
 		logicTimestamp.tickVectorTimestamp(nodeId);
 	}
@@ -156,15 +165,15 @@ public class ContentServer {
 				in = new ObjectInputStream(commPort.getInputStream());
 				while (true) {
 					try {
-						RequestObject oRequest = (RequestObject)in.readObject();
+						MessageObject oMessage = (MessageObject)in.readObject();
 						
-						if (oRequest != null && getServerStatus() != ServerStatus.SERVER_FAIL) {
+						if (oMessage != null && getServerStatus() != ServerStatus.SERVER_FAIL) {
 							/*Incoming message, let's adjust my clock*/
 							tickMyClock();
-							adjustMyClock(oRequest.getRequestTimestamp());
+							adjustMyClock(oMessage.getTimestamp());
 						}
 						
-						handleIncomeMessage(oRequest);
+						handleIncomeMessage(oMessage);
 						
 					}catch (EOFException eofex) {
 						eofex.printStackTrace(System.err);
@@ -191,8 +200,8 @@ public class ContentServer {
 		
 	}
 	
-	public void handleIncomeMessage(RequestObject oRequest) {
-		RequestType requestType = oRequest.getRequestType();
+	public void handleIncomeMessage(MessageObject oRequest) {
+		MessageType requestType = oRequest.getRequestType();
 		switch (requestType) { 
 			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
 			case CLIENT_PUT_OBJECT :handleClientPutRequest(); break;
@@ -222,14 +231,20 @@ public class ContentServer {
 		
 	}
 	
-	private void establishConnectionToServers() {
+	private void establishConnectionToServers() throws UnknownHostException, IOException {
+		/*save all the connections to the other servers */
 		for (NodeConfiguration aConfig : Main.getAllNodes()) {
-			
+			if (aConfig.getNodeId() != this.config.getNodeId()) {
+				Socket socket = new Socket(aConfig.getHostName(), aConfig.getPortNo());
+				this.outboundSockets.put(aConfig.getNodeId(), socket);
+				ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+				this.outboundPipes.put(aConfig.getNodeId(), out);
+			}
 		}
 	}
 
 
-	public void start() throws IOException {
+	public void start() throws UnknownHostException, IOException {
 		// Start Listener thread
 		ListenerThread listener = new ListenerThread(config.getPortNo());
 		
@@ -239,7 +254,7 @@ public class ContentServer {
 
 		/*now create connections to other servers */
 		
-		
+		establishConnectionToServers();
 	}
 		
 

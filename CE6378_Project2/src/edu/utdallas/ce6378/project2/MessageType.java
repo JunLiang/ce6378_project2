@@ -1,7 +1,8 @@
 package edu.utdallas.ce6378.project2;
 
-public enum RequestType {
+public enum MessageType {
 	
+	/*Request Types*/
 	CLIENT_PUT_OBJECT,
 
 	CLIENT_GET_OBJECT,
@@ -16,6 +17,16 @@ public enum RequestType {
 	
 	SERVER_CONTROL_ISOLATE, //ask server to simulate broken link with other servers.
 	
-	SERVER_CONTROL_RESUME //Resume all functions
+	SERVER_CONTROL_RESUME, //Resume all functions
+	
+	
+	/*Response Types*/
+	SERVER_TO_CLIENT_PUT_OK,
+
+	SERVER_TO_CLIENT_PUT_FAIL,
+	
+	SERVER_TO_CLIENT_READ_OK,
+	
+	SERVER_UNAVAILABLE
 
 }

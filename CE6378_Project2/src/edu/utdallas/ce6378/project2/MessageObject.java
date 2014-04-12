@@ -2,34 +2,34 @@ package edu.utdallas.ce6378.project2;
 
 import java.io.Serializable;
 
-public class RequestObject implements Serializable{
+public class MessageObject implements Serializable{
 	
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 8421848454689383113L;
-	private RequestType requestType;	
+	private MessageType requestType;	
 	private ContentObject requstObject;
 	private VectorTimestamp timestamp;
 	private Integer fromServerId;
 			
-	public  RequestObject () {
+	public  MessageObject () {
 		fromServerId = -1;
 	}
 
-	public VectorTimestamp getRequestTimestamp() {
+	public VectorTimestamp getTimestamp() {
 		return timestamp;
 	}
 
-	public void setRequestTimestamp(VectorTimestamp requestTimestamp) {
+	public void setTimestamp(VectorTimestamp requestTimestamp) {
 		this.timestamp = requestTimestamp;
 	}
 
-	public RequestType getRequestType() {
+	public MessageType getRequestType() {
 		return requestType;
 	}
 
-	public void setRequestType(RequestType requestType) {
+	public void setRequestType(MessageType requestType) {
 		this.requestType = requestType;
 	}
 
