@@ -7,19 +7,14 @@ public class ContentObject implements Serializable{
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 12345678L;
+	private static final long serialVersionUID = 254381135253496165L;
+
 
 	private Long objId; //Key 
 	
 	private String strValue;
 	
 	private Integer intValue;
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
 
 	public Long getObjId() {
 		return objId;

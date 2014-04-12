@@ -1,21 +1,28 @@
 package edu.utdallas.ce6378.project2;
 
-public class ObjectRequest {
+import java.io.Serializable;
+
+public class RequestObject implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8421848454689383113L;
 	private RequestType requestType;	
 	private ContentObject requstObject;
-	private VectorTimestamp requestTimestamp;
+	private VectorTimestamp timestamp;
+	private Integer fromServerId;
 			
-	public  ObjectRequest () {
-				
+	public  RequestObject () {
+		fromServerId = -1;
 	}
 
 	public VectorTimestamp getRequestTimestamp() {
-		return requestTimestamp;
+		return timestamp;
 	}
 
 	public void setRequestTimestamp(VectorTimestamp requestTimestamp) {
-		this.requestTimestamp = requestTimestamp;
+		this.timestamp = requestTimestamp;
 	}
 
 	public RequestType getRequestType() {
@@ -32,6 +39,14 @@ public class ObjectRequest {
 
 	public void setRequstObject(ContentObject requstObject) {
 		this.requstObject = requstObject;
+	}
+
+	public Integer getFromServerId() {
+		return fromServerId;
+	}
+
+	public void setFromServerId(Integer fromServerId) {
+		this.fromServerId = fromServerId;
 	}
 
 }

@@ -4,7 +4,9 @@ package edu.utdallas.ce6378.project2;
 
 public class VectorTimestamp implements Comparable<VectorTimestamp>{
 	
-	private Integer timeVector[] = new Integer[3];
+	private static Integer number_of_servers = 3;
+	
+	private Integer timeVector[] = new Integer[number_of_servers];
 	
 	
 	
@@ -51,8 +53,21 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>{
 		this.timeVector = timeVector;
 	}
 	
-	public void tickVectorTimestamp(VectorTimestamp o) {
+	public void tickVectorTimestamp(Integer nodeId) {
+		this.timeVector[nodeId] = this.timeVector[nodeId]+1;
 		
+	}
+	
+	public void adjustVectorTimestamp(VectorTimestamp vts, Integer nodeId) {
+		for (int i = 0; i < vts.getTimeVector().length; i++) {
+			if (i != nodeId) {
+				if (this.timeVector[i] < vts.getTimeVector()[i]) {
+					this.timeVector[i] = vts.getTimeVector()[i];
+				}
+			} else {
+				assert (this.timeVector[i]  >= vts.getTimeVector()[i]);
+			}
+		}
 	}
 
 }
