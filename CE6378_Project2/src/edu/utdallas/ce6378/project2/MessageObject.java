@@ -8,8 +8,8 @@ public class MessageObject implements Serializable{
 	 * 
 	 */
 	private static final long serialVersionUID = 8421848454689383113L;
-	private MessageType requestType;	
-	private ContentObject requstObject;
+	private MessageType messageType;	
+	private ContentObject contentObject;
 	private VectorTimestamp timestamp;
 	private Integer fromServerId;
 			
@@ -25,20 +25,20 @@ public class MessageObject implements Serializable{
 		this.timestamp = requestTimestamp;
 	}
 
-	public MessageType getRequestType() {
-		return requestType;
+	public MessageType getMessageType() {
+		return messageType;
 	}
 
-	public void setRequestType(MessageType requestType) {
-		this.requestType = requestType;
+	public void setMessageType(MessageType requestType) {
+		this.messageType = requestType;
 	}
 
-	public ContentObject getRequstObject() {
-		return requstObject;
+	public ContentObject getContentObject() {
+		return contentObject;
 	}
 
-	public void setRequstObject(ContentObject requstObject) {
-		this.requstObject = requstObject;
+	public void setContentObject(ContentObject requstObject) {
+		this.contentObject = requstObject;
 	}
 
 	public Integer getFromServerId() {

@@ -201,7 +201,7 @@ public class ContentServer {
 	}
 	
 	public void handleIncomeMessage(MessageObject oRequest) {
-		MessageType requestType = oRequest.getRequestType();
+		MessageType requestType = oRequest.getMessageType();
 		switch (requestType) { 
 			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
 			case CLIENT_PUT_OBJECT :handleClientPutRequest(); break;
