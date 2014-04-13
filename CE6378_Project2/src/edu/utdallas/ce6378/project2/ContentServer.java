@@ -36,7 +36,9 @@ public class ContentServer {
 	
 	private NodeConfiguration config;
 	
-	
+	/*save the direct connections to other servers to 
+	 * initiate server to server communications.
+	 */
 	private TreeMap<Integer,ObjectOutputStream> outboundPipes;
 	private TreeMap<Integer, Socket> outboundSockets;
 	
@@ -161,8 +163,11 @@ public class ContentServer {
 		public void run() {
 			// TODO Auto-generated method stub
 			ObjectInputStream in  = null;
+			ObjectOutputStream out  = null;
 			try {
 				in = new ObjectInputStream(commPort.getInputStream());
+				out = new ObjectOutputStream (commPort.getOutputStream());
+				
 				while (true) {
 					try {
 						MessageObject oMessage = (MessageObject)in.readObject();
@@ -173,8 +178,11 @@ public class ContentServer {
 							adjustMyClock(oMessage.getTimestamp());
 						}
 						
-						handleIncomeMessage(oMessage);
+						MessageObject returnMessage = handleIncomeMessage(oMessage);
 						
+						if (returnMessage != null) {
+							out.writeObject(returnMessage);
+						}					
 					}catch (EOFException eofex) {
 						eofex.printStackTrace(System.err);
 					}catch (IOException ioex) {
@@ -199,8 +207,8 @@ public class ContentServer {
 		}
 		
 	}
-	
-	public void handleIncomeMessage(MessageObject oMessage) {
+		
+	public MessageObject handleIncomeMessage(MessageObject oMessage) {
 		MessageType messageType = oMessage.getMessageType();
 		switch (messageType) { 
 			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
@@ -210,6 +218,7 @@ public class ContentServer {
 			case SERVER_CONTROL_FAIL: handleSimulationFail(); break;
 			default : break;
 		}
+		return null;
 	}
 
 	private void handleSimulationFail() {
