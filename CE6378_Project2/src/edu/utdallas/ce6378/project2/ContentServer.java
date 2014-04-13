@@ -200,15 +200,21 @@ public class ContentServer {
 		
 	}
 	
-	public void handleIncomeMessage(MessageObject oRequest) {
-		MessageType requestType = oRequest.getMessageType();
-		switch (requestType) { 
+	public void handleIncomeMessage(MessageObject oMessage) {
+		MessageType messageType = oMessage.getMessageType();
+		switch (messageType) { 
 			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
 			case CLIENT_PUT_OBJECT :handleClientPutRequest(); break;
 			case SERVER_PUT_OBJECT :handleServerPutRequest(); break;
 			case SERVER_GET_OBJECTS :handleServerGetRequest(); break;
+			case SERVER_CONTROL_FAIL: handleSimulationFail(); break;
 			default : break;
 		}
+	}
+
+	private void handleSimulationFail() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void handleServerGetRequest() {
