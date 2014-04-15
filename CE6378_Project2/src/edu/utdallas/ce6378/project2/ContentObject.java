@@ -10,18 +10,18 @@ public class ContentObject implements Serializable{
 	private static final long serialVersionUID = 254381135253496165L;
 
 
-	private Long objId; //Key 
+	private Integer objId; //Key 
 	
 	private String strValue;
 	
 	private Integer intValue;
 
-	public Long getObjId() {
+	public Integer getObjId() {
 		return objId;
 	}
 
 
-	public void setObjId(Long objId) {
+	public void setObjId(Integer objId) {
 		this.objId = objId;
 	}
 

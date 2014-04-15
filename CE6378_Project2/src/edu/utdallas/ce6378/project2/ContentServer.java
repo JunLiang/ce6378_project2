@@ -18,9 +18,9 @@ public class ContentServer {
 	
 	//Content stored on each server.
 	
-	private ConcurrentHashMap<Long, ContentObject> primaryObjects;
-	private ConcurrentHashMap<Long, ContentObject> secondaryObjects;
-	private ConcurrentHashMap<Long, ContentObject> tertiaryObjects;
+	private ConcurrentHashMap<Integer, ContentObject> primaryObjects;
+	private ConcurrentHashMap<Integer, ContentObject> secondaryObjects;
+	private ConcurrentHashMap<Integer, ContentObject> tertiaryObjects;
 	
 	//This is used to store the socket of other servers.
 	//These sockets should be available at all time
@@ -36,7 +36,9 @@ public class ContentServer {
 	
 	private NodeConfiguration config;
 	
-	
+	/*save the direct connections to other servers to 
+	 * initiate server to server communications.
+	 */
 	private TreeMap<Integer,ObjectOutputStream> outboundPipes;
 	private TreeMap<Integer, Socket> outboundSockets;
 	
@@ -44,9 +46,9 @@ public class ContentServer {
 		// TODO Auto-generated constructor stub
 		config = localNodeConfig;
 		logicTimestamp = new VectorTimestamp();		
-		primaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
-		secondaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
-		tertiaryObjects = new ConcurrentHashMap<Long, ContentObject> ();
+		primaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
+		secondaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
+		tertiaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		serverSockets = new TreeMap<Integer, Socket> ();
 		outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
 		outboundSockets = new TreeMap<Integer, Socket>();
@@ -64,30 +66,30 @@ public class ContentServer {
 		this.nodeId = nodeId;
 	}
 
-	public ConcurrentHashMap<Long, ContentObject> getPrimaryObjects() {
+	public ConcurrentHashMap<Integer, ContentObject> getPrimaryObjects() {
 		return primaryObjects;
 	}
 
 	public void setPrimaryObjects(
-			ConcurrentHashMap<Long, ContentObject> primaryObjects) {
+			ConcurrentHashMap<Integer, ContentObject> primaryObjects) {
 		this.primaryObjects = primaryObjects;
 	}
 
-	public ConcurrentHashMap<Long, ContentObject> getSecondaryObjects() {
+	public ConcurrentHashMap<Integer, ContentObject> getSecondaryObjects() {
 		return secondaryObjects;
 	}
 
 	public void setSecondaryObjects(
-			ConcurrentHashMap<Long, ContentObject> secondaryObjects) {
+			ConcurrentHashMap<Integer, ContentObject> secondaryObjects) {
 		this.secondaryObjects = secondaryObjects;
 	}
 
-	public ConcurrentHashMap<Long, ContentObject> getTertiaryObjects() {
+	public ConcurrentHashMap<Integer, ContentObject> getTertiaryObjects() {
 		return tertiaryObjects;
 	}
 
 	public void setTertiaryObjects(
-			ConcurrentHashMap<Long, ContentObject> tertiaryObjects) {
+			ConcurrentHashMap<Integer, ContentObject> tertiaryObjects) {
 		this.tertiaryObjects = tertiaryObjects;
 	}
 
@@ -161,8 +163,11 @@ public class ContentServer {
 		public void run() {
 			// TODO Auto-generated method stub
 			ObjectInputStream in  = null;
+			ObjectOutputStream out  = null;
 			try {
 				in = new ObjectInputStream(commPort.getInputStream());
+				out = new ObjectOutputStream (commPort.getOutputStream());
+				
 				while (true) {
 					try {
 						MessageObject oMessage = (MessageObject)in.readObject();
@@ -173,8 +178,11 @@ public class ContentServer {
 							adjustMyClock(oMessage.getTimestamp());
 						}
 						
-						handleIncomeMessage(oMessage);
+						MessageObject returnMessage = handleIncomeMessage(oMessage);
 						
+						if (returnMessage != null) {
+							out.writeObject(returnMessage);
+						}					
 					}catch (EOFException eofex) {
 						eofex.printStackTrace(System.err);
 					}catch (IOException ioex) {
@@ -199,16 +207,26 @@ public class ContentServer {
 		}
 		
 	}
-	
-	public void handleIncomeMessage(MessageObject oRequest) {
-		MessageType requestType = oRequest.getMessageType();
-		switch (requestType) { 
-			case CLIENT_GET_OBJECT :handleClientGetRequest(); break;
-			case CLIENT_PUT_OBJECT :handleClientPutRequest(); break;
+		
+	public MessageObject handleIncomeMessage(MessageObject oMessage) {
+		MessageType messageType = oMessage.getMessageType();
+		ContentObject returnObject = null;
+		MessageObject returnMessage = new MessageObject();
+		switch (messageType) { 
+			case CLIENT_GET_OBJECT :returnObject = handleClientGetRequest(oMessage.getContentObject()); break;
+			case CLIENT_PUT_OBJECT :handleClientPutRequest(oMessage.getContentObject()); break;
 			case SERVER_PUT_OBJECT :handleServerPutRequest(); break;
 			case SERVER_GET_OBJECTS :handleServerGetRequest(); break;
+			case SERVER_CONTROL_FAIL: handleSimulationFail(); break;
 			default : break;
 		}
+		returnMessage.setContentObject(returnObject);
+		return returnMessage;
+	}
+
+	private void handleSimulationFail() {
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void handleServerGetRequest() {
@@ -221,13 +239,78 @@ public class ContentServer {
 		
 	}
 
-	private void handleClientPutRequest() {
+	private boolean handleClientPutRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
+		boolean putResult = false;
+		if (objectParam != null) {
+			Integer key = objectParam.getObjId();
+			
+			Integer primaryHashValue = (key % 7 );
+			Integer secondHashvalue = (primaryHashValue + 1) % 7;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
+			
+			MessageObject message = new MessageObject();
+			
+			message.setContentObject(objectParam);
+			message.setFromServerId(nodeId);
+			message.setMessageType(MessageType.SERVER_PUT_OBJECT);
+			
+			//TODO, need a non blocking way to send the write request 
+			//to other severs and wait for an answer.
+			
+			if (primaryHashValue != this.nodeId) {
+				try {
+					this.outboundPipes.get(primaryHashValue).writeObject(message);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if (secondHashvalue != this.nodeId) {
+				try {
+					this.outboundPipes.get(secondHashvalue).writeObject(message);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			if (tertiaryHashvalue != this.nodeId) {
+				try {
+					this.outboundPipes.get(tertiaryHashvalue).writeObject(message);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}			
+		}
+		
+		return putResult;
 		
 	}
 
-	private void handleClientGetRequest() {
+	private ContentObject handleClientGetRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
+		
+		ContentObject returnObject = null;
+		if (objectParam != null) {
+			Integer key = objectParam.getObjId();
+			
+			Integer primaryHashValue = (key % 7 );
+			Integer secondHashvalue = (primaryHashValue + 1) % 7;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
+			
+			if (primaryHashValue.equals(nodeId)) {
+				returnObject = this.primaryObjects.get(key); 
+			} else if (secondHashvalue.equals(nodeId)) {
+				returnObject = this.secondaryObjects.get(key); 
+			} else if (tertiaryHashvalue.equals(key)){
+				returnObject = this.tertiaryObjects.get(key);
+			}
+		}
+		
+		return returnObject;
 		
 	}
 	
