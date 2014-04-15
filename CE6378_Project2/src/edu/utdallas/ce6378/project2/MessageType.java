@@ -13,11 +13,13 @@ public enum MessageType {
 	
 	SERVER_GET_OBJECTS,
 	
+	/*Server control Types*/
 	SERVER_CONTROL_FAIL, //ask server to simulate failure
 	
 	SERVER_CONTROL_ISOLATE, //ask server to simulate broken link with other servers.
 	
 	SERVER_CONTROL_RESUME, //Resume all functions
+	
 	
 	
 	/*Response Types*/
@@ -27,6 +29,7 @@ public enum MessageType {
 	
 	SERVER_TO_CLIENT_READ_OK,
 	
+	/*Only respond when server simulates failure*/
 	SERVER_UNAVAILABLE
 
 }

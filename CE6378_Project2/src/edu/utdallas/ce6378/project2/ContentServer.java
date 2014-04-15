@@ -252,10 +252,17 @@ public class ContentServer {
 		
 		listenerThread.start();
 
-		/*now create connections to other servers */
+		/*now wait for other servers to come up before 
+		 * creating connections to other servers */
 		
-		establishConnectionToServers();
+		try {
+			Thread.sleep(6000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace(System.err);
+		}
+		
+		establishConnectionToServers();	
 	}
-		
 
 }
