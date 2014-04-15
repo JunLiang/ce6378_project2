@@ -211,6 +211,7 @@ public class ContentServer {
 	public MessageObject handleIncomeMessage(MessageObject oMessage) {
 		MessageType messageType = oMessage.getMessageType();
 		ContentObject returnObject = null;
+		MessageObject returnMessage = new MessageObject();
 		switch (messageType) { 
 			case CLIENT_GET_OBJECT :returnObject = handleClientGetRequest(oMessage.getContentObject()); break;
 			case CLIENT_PUT_OBJECT :handleClientPutRequest(oMessage.getContentObject()); break;
@@ -219,7 +220,8 @@ public class ContentServer {
 			case SERVER_CONTROL_FAIL: handleSimulationFail(); break;
 			default : break;
 		}
-		return null;
+		returnMessage.setContentObject(returnObject);
+		return returnMessage;
 	}
 
 	private void handleSimulationFail() {
