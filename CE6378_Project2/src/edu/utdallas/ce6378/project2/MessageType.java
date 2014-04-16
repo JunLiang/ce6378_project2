@@ -29,6 +29,8 @@ public enum MessageType {
 	
 	SERVER_TO_CLIENT_READ_OK,
 	
+	SERVER_TO_SERVER_PUT_OK,
+	
 	/*Only respond when server simulates failure*/
 	SERVER_UNAVAILABLE
 

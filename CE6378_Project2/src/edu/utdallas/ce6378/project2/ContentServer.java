@@ -238,6 +238,65 @@ public class ContentServer {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private boolean pollServerForWriteAgreement(MessageObject message, Integer serverId) {
+		boolean result = false;
+		
+		Socket commPort = null;
+		ObjectInputStream reader = null;
+		ObjectOutputStream writer = null; 
+		
+		try {
+			commPort = new Socket(Main.getAllNodes().get(serverId).getHostName(), Main.getAllNodes().get(serverId).getPortNo());
+			writer = new ObjectOutputStream (commPort.getOutputStream());
+			reader = new ObjectInputStream (commPort.getInputStream());
+			
+			writer.writeObject(message);
+			
+			MessageObject returnMessage = (MessageObject) reader.readObject();
+			
+			//If server agrees to write this value.
+			if (returnMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_OK) {
+				result = true;
+			}	
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace(System.err);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace(System.err);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}				
+			if (commPort != null) {
+				try {
+					commPort.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}
+		}
+		return result;
+		
+	}
 
 	private boolean handleClientPutRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
@@ -259,30 +318,15 @@ public class ContentServer {
 			//to other severs and wait for an answer.
 			
 			if (primaryHashValue != this.nodeId) {
-				try {
-					this.outboundPipes.get(primaryHashValue).writeObject(message);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				putResult = pollServerForWriteAgreement(message, primaryHashValue) ;
 			}
 			
 			if (secondHashvalue != this.nodeId) {
-				try {
-					this.outboundPipes.get(secondHashvalue).writeObject(message);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				putResult = putResult || pollServerForWriteAgreement(message, secondHashvalue) ;
 			}
 			
 			if (tertiaryHashvalue != this.nodeId) {
-				try {
-					this.outboundPipes.get(tertiaryHashvalue).writeObject(message);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				putResult = putResult || pollServerForWriteAgreement(message, tertiaryHashvalue) ;
 			}			
 		}
 		
