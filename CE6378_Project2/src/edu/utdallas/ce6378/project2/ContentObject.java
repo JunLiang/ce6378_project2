@@ -17,6 +17,13 @@ public class ContentObject implements Serializable{
 	private Integer intValue;
 	
 	private VectorTimestamp timestamp;
+	
+	public ContentObject(){
+		objId = -1;
+		strValue = "";
+		intValue = 0;
+		timestamp = new VectorTimestamp (3);
+	}
 
 	public Integer getObjId() {
 		return objId;
@@ -56,9 +63,11 @@ public class ContentObject implements Serializable{
 		return timestamp;
 	}
 
-
 	public void setTimestamp(VectorTimestamp timestamp) {
-		this.timestamp = timestamp;
+		if (this.timestamp.getTimeVector().length == timestamp.getTimeVector().length) {
+			//Copy the time vector 
+			this.timestamp.setTimeVector(timestamp.getTimeVector()) ;
+		}
 	}
 
 }

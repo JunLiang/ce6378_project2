@@ -6,6 +6,8 @@ public class Constant {
 	public static final Integer hashBase = 7;
 	
 	//topN is the number of servers serve the same object
-	public static final Integer topN = 3;
+	public static final Integer  topN = 3;
+	
+	public static final Integer numberOfServers = 7;
 
 }

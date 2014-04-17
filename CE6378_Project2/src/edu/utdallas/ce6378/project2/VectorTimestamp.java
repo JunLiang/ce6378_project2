@@ -14,12 +14,16 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializabl
 
 	
 	
-	private Integer timeVector[] = new Integer[Constant.topN];
+	private Integer timeVector[] = null;
 	
 	
 	
 	/*Initialize a time vector*/
-	public VectorTimestamp () {
+	
+	//The vector time stamp can have different lengths
+	//the 3 elements vector is used for 
+	public VectorTimestamp (Integer n) {
+		timeVector = new Integer[n];
 		//Initialize the vector to 0
 		for (int i = 0; i < timeVector.length; i++) {
 			timeVector[i] = 0;
@@ -85,8 +89,8 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializabl
 	}
 	
 	public static void main(String[] args) {
-		VectorTimestamp a = new VectorTimestamp();
-		VectorTimestamp b = new VectorTimestamp();
+		VectorTimestamp a = new VectorTimestamp(3);
+		VectorTimestamp b = new VectorTimestamp(3);
 		
 		Random rand = new Random();
 		

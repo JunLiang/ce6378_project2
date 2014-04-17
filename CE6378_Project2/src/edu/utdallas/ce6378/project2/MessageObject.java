@@ -11,21 +11,21 @@ public class MessageObject implements Serializable{
 	private MessageType messageType;	
 	private ContentObject contentObject;
 	private Integer fromServerId;
+	private VectorTimestamp timestamp;
 			
 	public  MessageObject () {
 		fromServerId = -1;
 		contentObject = null;
 		messageType = MessageType.SERVER_UNAVAILABLE;
+		timestamp = new VectorTimestamp (Constant.numberOfServers);
 	}
 
 	public VectorTimestamp getTimestamp() {
-		return contentObject != null ? contentObject.getTimestamp() : null;
+		return timestamp;
 	}
 
 	public void setTimestamp(VectorTimestamp timestamp) {
-		if (contentObject != null ) {
-			contentObject.setTimestamp(timestamp);
-		}
+		this.timestamp.setTimeVector(timestamp.getTimeVector());
 	}
 
 	public MessageType getMessageType() {

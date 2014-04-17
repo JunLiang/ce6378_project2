@@ -45,7 +45,7 @@ public class ContentServer {
 	public ContentServer(NodeConfiguration localNodeConfig) {
 		// TODO Auto-generated constructor stub
 		config = localNodeConfig;
-		logicTimestamp = new VectorTimestamp();		
+		logicTimestamp = new VectorTimestamp(Constant.numberOfServers);		
 		primaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		secondaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		tertiaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
@@ -209,15 +209,34 @@ public class ContentServer {
 	}
 		
 	public MessageObject handleIncomeMessage(MessageObject oMessage) {
+		//Handle messages 
+		
 		MessageType messageType = oMessage.getMessageType();
 		MessageObject returnMessage = null;
-		switch (messageType) { 
-			case CLIENT_GET_OBJECT :returnMessage = handleClientGetRequest(oMessage.getContentObject()); break;
-			case CLIENT_PUT_OBJECT :returnMessage = handleClientPutRequest(oMessage.getContentObject()); break;
-			case SERVER_PUT_OBJECT :returnMessage = handleServerPutRequest(); break;
-			case SERVER_GET_OBJECTS :returnMessage = handleServerGetRequest(); break;
-			case SERVER_CONTROL_FAIL:returnMessage = handleSimulationFail(); break;
-			default : break;
+		
+		if (this.serverStatus == ServerStatus.SERVER_FAIL) {
+			
+			returnMessage = new MessageObject();
+			returnMessage.setFromServerId(nodeId);
+			returnMessage.setMessageType(MessageType.SERVER_UNAVAILABLE);
+			
+		} else {			
+	 		
+			switch (messageType) { 
+				
+				case CLIENT_GET_OBJECT :returnMessage = handleClientGetRequest(oMessage.getContentObject()); break;
+				
+				case CLIENT_PUT_OBJECT :returnMessage = handleClientPutRequest(oMessage.getContentObject()); break;
+				
+				case SERVER_PUT_OBJECT :returnMessage = handleServerPutRequest(oMessage.getContentObject()); break;
+				
+				//Handle this request type later, as crash recover is not yet required.
+				case SERVER_GET_OBJECTS :returnMessage = handleServerGetRequest(); break;
+				
+				case SERVER_CONTROL_FAIL:returnMessage = handleSimulationFail(); break;
+				
+				default : break;
+			}		
 		}		
 		
 		return returnMessage;
@@ -225,7 +244,13 @@ public class ContentServer {
 
 	private MessageObject handleSimulationFail() {
 		// TODO Auto-generated method stub
-		return null;
+		MessageObject newMessage = new MessageObject();
+		
+		newMessage.setFromServerId(nodeId);
+		newMessage.setMessageType(MessageType.SERVER_UNAVAILABLE);
+		newMessage.setContentObject(null);
+		
+		return newMessage;
 		
 	}
 
@@ -234,9 +259,41 @@ public class ContentServer {
 		return null;
 	}
 
-	private MessageObject handleServerPutRequest() {
+	private MessageObject handleServerPutRequest(ContentObject contentObject) {
 		// TODO Auto-generated method stub
-		return null;
+		MessageObject newMessage = new MessageObject();
+		newMessage.setFromServerId(nodeId);
+		newMessage.setTimestamp(logicTimestamp);
+		newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_FAIL);
+		
+		if (contentObject != null) {
+			Integer key = contentObject.getObjId();
+			Integer primaryHashValue = (key % 7 );
+			Integer secondHashvalue = (primaryHashValue + 1) % 7;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
+			
+			ConcurrentHashMap<Integer, ContentObject> container = null;
+			
+			if (primaryHashValue.equals(nodeId)) {
+				container = this.primaryObjects;
+			} else if ( secondHashvalue.equals(nodeId)) {
+				container = this.secondaryObjects;
+			} else if ( tertiaryHashvalue.equals(nodeId)) {
+				container = this.tertiaryObjects;
+			}
+			
+			if (container != null) {
+				ContentObject obj = container.get(key);
+				
+				if (obj == null || obj.getTimestamp().compareTo(contentObject.getTimestamp()) < 0) {
+					container.put(key, contentObject);
+				}
+				
+				newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_OK);
+			}
+		}
+		
+		return newMessage;
 	}
 	
 	private boolean pollServerForWriteAgreement(MessageObject message, Integer serverId) {
@@ -294,8 +351,7 @@ public class ContentServer {
 				}
 			}			
 		}
-		return result;
-		
+		return result;		
 	}
 
 	private MessageObject handleClientPutRequest(ContentObject objectParam) {
@@ -309,6 +365,10 @@ public class ContentServer {
 			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
 			
 			MessageObject message = new MessageObject();
+			
+			Integer[] timeVector = new Integer [] {this.logicTimestamp.getTimeVector()[primaryHashValue], this.logicTimestamp.getTimeVector()[secondHashvalue], this.logicTimestamp.getTimeVector()[tertiaryHashvalue]};
+			
+			objectParam.getTimestamp().setTimeVector(timeVector);
 			
 			message.setContentObject(objectParam);
 			message.setFromServerId(nodeId);
