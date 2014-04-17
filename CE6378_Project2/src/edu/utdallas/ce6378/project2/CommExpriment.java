@@ -89,11 +89,12 @@ public class CommExpriment {
 			// TODO Auto-generated method stub
 			ObjectInputStream reader = null;
 			ObjectOutputStream writer = null; 
+			Random rand2 = new Random();
 			try{				
 				writer = new ObjectOutputStream (this.commPort.getOutputStream());
 				reader = new ObjectInputStream (this.commPort.getInputStream());
 				Integer round = 0;
-				while (round < 100) {
+				while (round < 101) {
 					try {
 						
 						System.out.println("Round: "+ round);
@@ -102,7 +103,7 @@ public class CommExpriment {
 						System.out.println("Server Read 1 " + value.getMessageType() + " Int value is "+ value.getContentObject().getIntValue());
 						
 						value.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
-						value.getContentObject().setStrValue("Abcd1234");
+						value.getContentObject().setStrValue("Abcd"+rand2.nextInt(1000));
 						writer.writeObject(value);
 						
 						Integer intValue = (Integer) reader.readObject();
@@ -110,6 +111,7 @@ public class CommExpriment {
 						writer.writeObject(round);
 						
 						round++;
+						writer.reset();
 					}
 					catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
@@ -167,7 +169,12 @@ public class CommExpriment {
 				writer = new ObjectOutputStream (commPort.getOutputStream());
 				reader = new ObjectInputStream (commPort.getInputStream());
 				Integer round = 0;
+				MessageObject newMessage = new MessageObject();
+				ContentObject newContent = new ContentObject();
 				
+				newMessage.setMessageType(MessageType.CLIENT_GET_OBJECT);
+				newMessage.setContentObject(newContent);
+				newContent.setObjId(randGen.nextInt(10000));
 				
 				while (round < 100) {
 					
@@ -175,23 +182,24 @@ public class CommExpriment {
 					Integer value;
 					try {
 						value = randGen.nextInt(10000);
-						System.out.println("client random value is "+value);
-						MessageObject newMessage = new MessageObject();
-						ContentObject newContent = new ContentObject();
+						//System.out.println("client random value is "+value);
 						
-						newMessage.setMessageType(MessageType.CLIENT_GET_OBJECT);
-						newMessage.setContentObject(newContent);
-						newContent.setObjId(randGen.nextInt(10000));
+						newMessage.getContentObject().setIntValue(value);
 						
-						newContent.setIntValue(value);
+						System.out.println("Client: The message object content int value is now "+newMessage.getContentObject().getIntValue());
+						
+						
 						writer.writeObject(newMessage);
 						
 						MessageObject oldMessage = (MessageObject) reader.readObject();
+						
 						System.out.println("Client 1: " + oldMessage.getMessageType() + " Str value " + oldMessage.getContentObject().getStrValue());
 						
 						writer.writeObject(randGen.nextInt(10000));
 						round = (Integer) reader.readObject();
 						System.out.println("Client 2 read round value : " + round);
+						
+						writer.reset();
 						
 					} catch (EOFException eofex) {
 						eofex.printStackTrace(System.err);
