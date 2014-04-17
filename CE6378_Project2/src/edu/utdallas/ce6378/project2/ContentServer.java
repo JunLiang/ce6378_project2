@@ -210,33 +210,33 @@ public class ContentServer {
 		
 	public MessageObject handleIncomeMessage(MessageObject oMessage) {
 		MessageType messageType = oMessage.getMessageType();
-		ContentObject returnObject = null;
-		MessageObject returnMessage = new MessageObject();
+		MessageObject returnMessage = null;
 		switch (messageType) { 
-			case CLIENT_GET_OBJECT :returnObject = handleClientGetRequest(oMessage.getContentObject()); break;
-			case CLIENT_PUT_OBJECT :handleClientPutRequest(oMessage.getContentObject()); break;
-			case SERVER_PUT_OBJECT :handleServerPutRequest(); break;
-			case SERVER_GET_OBJECTS :handleServerGetRequest(); break;
-			case SERVER_CONTROL_FAIL: handleSimulationFail(); break;
+			case CLIENT_GET_OBJECT :returnMessage = handleClientGetRequest(oMessage.getContentObject()); break;
+			case CLIENT_PUT_OBJECT :returnMessage = handleClientPutRequest(oMessage.getContentObject()); break;
+			case SERVER_PUT_OBJECT :returnMessage = handleServerPutRequest(); break;
+			case SERVER_GET_OBJECTS :returnMessage = handleServerGetRequest(); break;
+			case SERVER_CONTROL_FAIL:returnMessage = handleSimulationFail(); break;
 			default : break;
-		}
-		returnMessage.setContentObject(returnObject);
+		}		
+		
 		return returnMessage;
 	}
 
-	private void handleSimulationFail() {
+	private MessageObject handleSimulationFail() {
 		// TODO Auto-generated method stub
+		return null;
 		
 	}
 
-	private void handleServerGetRequest() {
+	private MessageObject handleServerGetRequest() {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 
-	private void handleServerPutRequest() {
+	private MessageObject handleServerPutRequest() {
 		// TODO Auto-generated method stub
-		
+		return null;
 	}
 	
 	private boolean pollServerForWriteAgreement(MessageObject message, Integer serverId) {
@@ -269,14 +269,6 @@ public class ContentServer {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			if (writer != null) {
-				try {
-					writer.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace(System.err);
-				}
-			}
 			if (reader != null) {
 				try {
 					reader.close();
@@ -293,14 +285,22 @@ public class ContentServer {
 					e.printStackTrace(System.err);
 				}
 			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}			
 		}
 		return result;
 		
 	}
 
-	private boolean handleClientPutRequest(ContentObject objectParam) {
+	private MessageObject handleClientPutRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
-		boolean putResult = false;
+		boolean putResultOk = false;
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
@@ -318,32 +318,41 @@ public class ContentServer {
 			//to other severs and wait for an answer.
 			
 			if (primaryHashValue != this.nodeId) {
-				putResult = pollServerForWriteAgreement(message, primaryHashValue) ;
+				putResultOk = pollServerForWriteAgreement(message, primaryHashValue) ;
 			}
 			
 			if (secondHashvalue != this.nodeId) {
-				putResult = putResult || pollServerForWriteAgreement(message, secondHashvalue) ;
+				putResultOk = putResultOk || pollServerForWriteAgreement(message, secondHashvalue) ;
 			}
 			
 			if (tertiaryHashvalue != this.nodeId) {
-				putResult = putResult || pollServerForWriteAgreement(message, tertiaryHashvalue) ;
-			}			
+				putResultOk = putResultOk || pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+			}
+			
+			if (putResultOk) {
+				
+			}
 		}
+		MessageObject newMessage = new MessageObject();
 		
-		return putResult;
+		if (putResultOk) {
+			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);
+		}
+		return newMessage;
 		
 	}
 
-	private ContentObject handleClientGetRequest(ContentObject objectParam) {
+	private MessageObject handleClientGetRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
 		
 		ContentObject returnObject = null;
+
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
-			Integer primaryHashValue = (key % 7 );
-			Integer secondHashvalue = (primaryHashValue + 1) % 7;
-			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
+			Integer primaryHashValue = (key % Constant.hashBase );
+			Integer secondHashvalue = (primaryHashValue + 1) % Constant.hashBase ;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase ;
 			
 			if (primaryHashValue.equals(nodeId)) {
 				returnObject = this.primaryObjects.get(key); 
@@ -353,9 +362,13 @@ public class ContentServer {
 				returnObject = this.tertiaryObjects.get(key);
 			}
 		}
+
+		MessageObject newMessage = new MessageObject();
 		
-		return returnObject;
+		newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
+		newMessage.setContentObject(returnObject);
 		
+		return newMessage;
 	}
 	
 	private void establishConnectionToServers() throws UnknownHostException, IOException {

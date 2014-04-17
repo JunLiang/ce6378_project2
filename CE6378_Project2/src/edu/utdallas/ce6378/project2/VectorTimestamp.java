@@ -1,12 +1,20 @@
 package edu.utdallas.ce6378.project2;
 
+import java.io.Serializable;
+import java.util.Random;
+
 //Vector time implementation
 
-public class VectorTimestamp implements Comparable<VectorTimestamp>{
+public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializable{
 	
-	private static Integer number_of_servers = 3;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1704856273686947045L;
+
 	
-	private Integer timeVector[] = new Integer[number_of_servers];
+	
+	private Integer timeVector[] = new Integer[Constant.topN];
 	
 	
 	
@@ -25,23 +33,14 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>{
 		//assume they are equal in this case.
 		assert(o.getTimeVector().length != this.timeVector.length);
 		
-		if (this.timeVector[0].equals(o.getTimeVector()[0]) 
-			&& this.timeVector[1].equals(o.getTimeVector()[1]) &&
-			this.timeVector[2].equals(o.getTimeVector()[2])) {
-			return 0;
+		for (int i = 0; i < this.timeVector.length; i++) {
+			if (this.timeVector[i] < o.getTimeVector()[i]) {
+				return -1;
+			} else if (this.timeVector[i] < o.getTimeVector()[i]) {
+				return 1;
+			}
 		}
-		
-		if (this.timeVector[0] < o.getTimeVector()[0]) {
-			return -1;
-		} else if (this.timeVector[0].equals(o.getTimeVector()[0]) && this.timeVector[1] < o.getTimeVector()[1] ) {
-			return -1;
-		} else if (this.timeVector[0].equals(o.getTimeVector()[0]) 
-			&& this.timeVector[1].equals(o.getTimeVector()[1]) &&
-			this.timeVector[2] < o.getTimeVector()[2]) {
-			return -1;
-		}
-		
-		return 1;
+		return 0;
 	}
 
 
@@ -50,7 +49,11 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>{
 	}
 
 	public void setTimeVector(Integer[] timeVector) {
-		this.timeVector = timeVector;
+		assert (this.timeVector.length == timeVector.length);
+		
+		for (int i = 0; i < this.timeVector.length; i++) {
+			this.timeVector[i] = timeVector[i];
+		}
 	}
 	
 	public void tickVectorTimestamp(Integer nodeId) {
@@ -68,6 +71,33 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>{
 				assert (this.timeVector[i]  >= vts.getTimeVector()[i]);
 			}
 		}
+	}
+	
+	public String printTimestamp () {
+		StringBuilder a = new StringBuilder();
+		a.append("[");
+		for (int i = 0; i < this.timeVector.length; i++) {
+			a.append(this.timeVector[i]).append(" ");
+		}
+		a.append("]");
+		
+		return a.toString();
+	}
+	
+	public static void main(String[] args) {
+		VectorTimestamp a = new VectorTimestamp();
+		VectorTimestamp b = new VectorTimestamp();
+		
+		Random rand = new Random();
+		
+		Integer [] av = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
+		Integer [] bv = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
+		
+		a.setTimeVector(av);
+		b.setTimeVector(bv);
+		
+		System.out.println("A " + a.printTimestamp() + " compares B " + b.printTimestamp() + " is " + a.compareTo(b));
+		
 	}
 
 }

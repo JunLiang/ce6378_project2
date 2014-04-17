@@ -15,6 +15,8 @@ public class ContentObject implements Serializable{
 	private String strValue;
 	
 	private Integer intValue;
+	
+	private VectorTimestamp timestamp;
 
 	public Integer getObjId() {
 		return objId;
@@ -47,6 +49,16 @@ public class ContentObject implements Serializable{
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+
+
+	public VectorTimestamp getTimestamp() {
+		return timestamp;
+	}
+
+
+	public void setTimestamp(VectorTimestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 
 }

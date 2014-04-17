@@ -10,19 +10,22 @@ public class MessageObject implements Serializable{
 	private static final long serialVersionUID = 8421848454689383113L;
 	private MessageType messageType;	
 	private ContentObject contentObject;
-	private VectorTimestamp timestamp;
 	private Integer fromServerId;
 			
 	public  MessageObject () {
 		fromServerId = -1;
+		contentObject = null;
+		messageType = MessageType.SERVER_UNAVAILABLE;
 	}
 
 	public VectorTimestamp getTimestamp() {
-		return timestamp;
+		return contentObject != null ? contentObject.getTimestamp() : null;
 	}
 
-	public void setTimestamp(VectorTimestamp requestTimestamp) {
-		this.timestamp = requestTimestamp;
+	public void setTimestamp(VectorTimestamp timestamp) {
+		if (contentObject != null ) {
+			contentObject.setTimestamp(timestamp);
+		}
 	}
 
 	public MessageType getMessageType() {
