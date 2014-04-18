@@ -7,10 +7,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+
 
 public class ContentServer {
 	
@@ -304,6 +303,8 @@ public class ContentServer {
 		ObjectOutputStream writer = null; 
 		
 		try {
+			this.tickMyClock();
+			
 			commPort = new Socket(Main.getAllNodes().get(serverId).getHostName(), Main.getAllNodes().get(serverId).getPortNo());
 			writer = new ObjectOutputStream (commPort.getOutputStream());
 			reader = new ObjectInputStream (commPort.getInputStream());
@@ -376,27 +377,39 @@ public class ContentServer {
 			
 			//TODO, need a non blocking way to send the write request 
 			//to other severs and wait for an answer.
-			
+			ConcurrentHashMap<Integer, ContentObject> container = null;
 			if (primaryHashValue != this.nodeId) {
 				putResultOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+			} else {
+				container = this.primaryObjects;
 			}
 			
 			if (secondHashvalue != this.nodeId) {
 				putResultOk = putResultOk || pollServerForWriteAgreement(message, secondHashvalue) ;
+			} else {
+				container = this.secondaryObjects;
 			}
 			
 			if (tertiaryHashvalue != this.nodeId) {
 				putResultOk = putResultOk || pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+			} else {
+				container = this.tertiaryObjects;
 			}
 			
 			if (putResultOk) {
-				
+				if (container.get(key) == null || container.get(key).getTimestamp().compareTo(objectParam.getTimestamp()) < 0 ) {
+					System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
+					container.put(key, objectParam);
+				}
 			}
 		}
+		
 		MessageObject newMessage = new MessageObject();
 		
 		if (putResultOk) {
 			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);
+			newMessage.setContentObject(null);
+			newMessage.setFromServerId(nodeId);
 		}
 		return newMessage;
 		
