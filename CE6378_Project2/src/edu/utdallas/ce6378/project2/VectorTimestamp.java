@@ -79,7 +79,7 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializabl
 	
 	public String printTimestamp () {
 		StringBuilder a = new StringBuilder();
-		a.append("[");
+		a.append("timestamp[");
 		for (int i = 0; i < this.timeVector.length; i++) {
 			a.append(this.timeVector[i]).append(" ");
 		}

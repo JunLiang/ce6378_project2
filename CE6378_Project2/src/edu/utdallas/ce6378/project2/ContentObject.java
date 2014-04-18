@@ -69,5 +69,13 @@ public class ContentObject implements Serializable{
 			this.timestamp.setTimeVector(timestamp.getTimeVector()) ;
 		}
 	}
+	
+	public String printContentObject() {
+		StringBuilder a = new StringBuilder();
+		a.append("ContentObject [" ).append (this.getObjId()) .append( ", " )
+		.append( this.getIntValue() ).append (", " ).append(this.getStrValue() )
+		.append( ", " ).append( this.getTimestamp().printTimestamp()).append("]");
+		return a.toString();
+	}
 
 }

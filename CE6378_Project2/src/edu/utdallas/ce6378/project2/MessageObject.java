@@ -51,5 +51,15 @@ public class MessageObject implements Serializable{
 	public void setFromServerId(Integer fromServerId) {
 		this.fromServerId = fromServerId;
 	}
+	
+	public String printMessageObject() {
+		StringBuilder a = new StringBuilder();
+		
+		a.append("Message[").append(this.getMessageType()).append(", ")
+		.append(this.getFromServerId()).append(",").append(this.getContentObject() == null ? null : this.getContentObject().printContentObject())
+		.append(", ").append(this.getTimestamp().printTimestamp()).append("]");
+		
+		return a.toString();
+	}
 
 }

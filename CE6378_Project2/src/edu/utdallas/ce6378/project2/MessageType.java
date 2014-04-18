@@ -33,6 +33,8 @@ public enum MessageType {
 	
 	SERVER_TO_SERVER_PUT_FAIL,
 	
+	SERVER_TO_SERVER_PUT_END,
+	
 	/*Only respond when server simulates failure*/
 	SERVER_UNAVAILABLE
 

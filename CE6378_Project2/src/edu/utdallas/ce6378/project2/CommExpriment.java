@@ -93,24 +93,21 @@ public class CommExpriment {
 			try{				
 				writer = new ObjectOutputStream (this.commPort.getOutputStream());
 				reader = new ObjectInputStream (this.commPort.getInputStream());
-				Integer round = 0;
-				while (round < 101) {
+				Boolean finished = false;
+				while (! finished) {
 					try {
 						
-						System.out.println("Round: "+ round);
-						MessageObject value = (MessageObject) reader.readObject();
 						
+						MessageObject value = (MessageObject) reader.readObject();						
 						System.out.println("Server Read 1 " + value.getMessageType() + " Int value is "+ value.getContentObject().getIntValue());
 						
 						value.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
 						value.getContentObject().setStrValue("Abcd"+rand2.nextInt(1000));
 						writer.writeObject(value);
 						
-						Integer intValue = (Integer) reader.readObject();
-						System.out.println("Server Read 2 " + intValue);
-						writer.writeObject(round);
+						finished = (Boolean ) reader.readObject();
+						System.out.println("Server Read 2 Finished " + finished);
 						
-						round++;
 						writer.reset();
 					}
 					catch (ClassNotFoundException e) {
@@ -195,11 +192,13 @@ public class CommExpriment {
 						
 						System.out.println("Client 1: " + oldMessage.getMessageType() + " Str value " + oldMessage.getContentObject().getStrValue());
 						
-						writer.writeObject(randGen.nextInt(10000));
-						round = (Integer) reader.readObject();
-						System.out.println("Client 2 read round value : " + round);
+						System.out.println("Client 1: round value is " + round);
+						writer.writeObject(new Boolean (round >= 99));
 						
+						round ++ ;
 						writer.reset();
+						
+						
 						
 					} catch (EOFException eofex) {
 						eofex.printStackTrace(System.err);
@@ -213,6 +212,12 @@ public class CommExpriment {
 				// TODO Auto-generated catch block
 				e.printStackTrace(System.err);
 			} finally {
+				/*try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}*/
 				if (writer != null) {
 					try {
 						writer.close();

@@ -38,19 +38,20 @@ public class ContentServer {
 	/*save the direct connections to other servers to 
 	 * initiate server to server communications.
 	 */
-	private TreeMap<Integer,ObjectOutputStream> outboundPipes;
-	private TreeMap<Integer, Socket> outboundSockets;
+	/*private TreeMap<Integer,ObjectOutputStream> outboundPipes;
+	private TreeMap<Integer, Socket> outboundSockets;*/
 	
 	public ContentServer(NodeConfiguration localNodeConfig) {
 		// TODO Auto-generated constructor stub
 		config = localNodeConfig;
+		nodeId = localNodeConfig.getNodeId();
 		logicTimestamp = new VectorTimestamp(Constant.numberOfServers);		
 		primaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		secondaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		tertiaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
 		serverSockets = new TreeMap<Integer, Socket> ();
-		outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
-		outboundSockets = new TreeMap<Integer, Socket>();
+		/*outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
+		outboundSockets = new TreeMap<Integer, Socket>();*/
 	}
 	
 	public ContentServer () {
@@ -163,11 +164,13 @@ public class ContentServer {
 			// TODO Auto-generated method stub
 			ObjectInputStream in  = null;
 			ObjectOutputStream out  = null;
+			
+			boolean terminate = false;
 			try {
 				in = new ObjectInputStream(commPort.getInputStream());
 				out = new ObjectOutputStream (commPort.getOutputStream());
 				
-				while (true) {
+				while (!terminate) {
 					try {
 						MessageObject oMessage = (MessageObject)in.readObject();
 						
@@ -175,6 +178,12 @@ public class ContentServer {
 							/*Incoming message, let's adjust my clock*/
 							tickMyClock();
 							adjustMyClock(oMessage.getTimestamp());
+						}
+						
+						if (oMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_END) {
+							//This is a connection established between servers for 
+							//write synchronization. Now write finished, terminate
+							terminate = true;
 						}
 						
 						MessageObject returnMessage = handleIncomeMessage(oMessage);
@@ -197,6 +206,23 @@ public class ContentServer {
 				if (in != null) {
 					try {
 						in.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				
+				if (out != null ) {
+					try {
+						out.close();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				if (commPort != null) {
+					try {
+						commPort.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -296,6 +322,7 @@ public class ContentServer {
 	}
 	
 	private boolean pollServerForWriteAgreement(MessageObject message, Integer serverId) {
+		
 		boolean result = false;
 		
 		Socket commPort = null;
@@ -305,7 +332,10 @@ public class ContentServer {
 		try {
 			this.tickMyClock();
 			
-			commPort = new Socket(Main.getAllNodes().get(serverId).getHostName(), Main.getAllNodes().get(serverId).getPortNo());
+			//Create a SERVER to SERVER connection (this connection is not needed to be permanent, 
+			//Once the message exchange finished, bring it down.
+			
+			commPort = new Socket(Main.getAllServerNodes().get(serverId).getHostName(), Main.getAllServerNodes().get(serverId).getPortNo());
 			writer = new ObjectOutputStream (commPort.getOutputStream());
 			reader = new ObjectInputStream (commPort.getInputStream());
 			
@@ -316,7 +346,20 @@ public class ContentServer {
 			//If server agrees to write this value.
 			if (returnMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_OK) {
 				result = true;
-			}	
+			}
+			
+			this.tickMyClock();
+			
+			MessageObject newMessage = new MessageObject();
+			newMessage.setFromServerId(getNodeId());
+			newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_END);
+			newMessage.setTimestamp(getLogicTimestamp());
+			newMessage.setContentObject(null);
+			
+			//Send this connection the termination message,
+			//so the other server does not have to busy wait anymore.
+			writer.writeObject(newMessage);
+			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace(System.err);
@@ -361,9 +404,9 @@ public class ContentServer {
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
-			Integer primaryHashValue = (key % 7 );
-			Integer secondHashvalue = (primaryHashValue + 1) % 7;
-			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
+			Integer primaryHashValue = (key % Constant.hashBase );
+			Integer secondHashvalue = (primaryHashValue + 1) % Constant.hashBase;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase;
 			
 			MessageObject message = new MessageObject();
 			
@@ -444,8 +487,8 @@ public class ContentServer {
 		return newMessage;
 	}
 	
-	private void establishConnectionToServers() throws UnknownHostException, IOException {
-		/*save all the connections to the other servers */
+	/*private void establishConnectionToServers() throws UnknownHostException, IOException {
+		//save all the connections to the other servers 
 		for (NodeConfiguration aConfig : Main.getAllNodes()) {
 			if (aConfig.getNodeId() != this.config.getNodeId()) {
 				Socket socket = new Socket(aConfig.getHostName(), aConfig.getPortNo());
@@ -454,7 +497,7 @@ public class ContentServer {
 				this.outboundPipes.put(aConfig.getNodeId(), out);
 			}
 		}
-	}
+	}*/
 
 
 	public void start() throws UnknownHostException, IOException {
@@ -475,7 +518,7 @@ public class ContentServer {
 			e.printStackTrace(System.err);
 		}
 		
-		establishConnectionToServers();	
+		//establishConnectionToServers();	
 	}
 
 }
