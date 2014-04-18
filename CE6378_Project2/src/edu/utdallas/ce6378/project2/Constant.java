@@ -9,5 +9,9 @@ public class Constant {
 	public static final Integer  topN = 3;
 	
 	public static final Integer numberOfServers = 7;
+	
+	public static final Integer objectKeyRange = 10000;
+	
+	public static final Integer objectValueRange = 100000;
 
 }

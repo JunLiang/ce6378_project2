@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.Random;
 
 public class ContentClient {
 	
@@ -43,6 +44,11 @@ public class ContentClient {
 		try {
 			Thread.sleep(6000);
 			establishConnectionToServers();
+			
+			Thread clientThread = new Thread(new ClientThread());
+			
+			clientThread.start();
+			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -53,7 +59,7 @@ public class ContentClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			for (ObjectOutputStream out : this.writeToServerPipes.values()) {
+			/*for (ObjectOutputStream out : this.writeToServerPipes.values()) {
 				try {
 					out.close();
 				} catch (IOException e) {
@@ -78,25 +84,82 @@ public class ContentClient {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}
+			}*/
 		}
 		
 		
 		
 	}
 	
-	class clientThread implements Runnable {
+	class ClientThread implements Runnable {
 		
-		public clientThread() {
+		public ClientThread() {
 			
 		}
 
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
+			Random randGen = new Random();
 			
-		}
-		
+			Integer round = 0;
+			
+
+			while (round < 100) {
+			
+				Integer key = randGen.nextInt(Constant.objectKeyRange);
+				Integer intValue = randGen.nextInt(Constant.objectValueRange);
+				//use guid as random string value
+				String strValue = java.util.UUID.randomUUID().toString();
+				
+				ContentObject content = new ContentObject();
+				content.setObjId(key);
+				content.setIntValue(intValue);
+				content.setStrValue(strValue);
+				
+								
+				try {
+					Integer writeServerId = (key + randGen.nextInt(3)) % Constant.hashBase;
+					MessageObject message = new MessageObject();
+					message.setContentObject(content);
+					message.setMessageType(MessageType.CLIENT_PUT_OBJECT);
+					
+					writeToServerPipes.get(writeServerId).writeObject(message);
+					
+					MessageObject returnMessage = (MessageObject) readFromServerPipes.get(writeServerId).readObject();
+					
+					System.out.println("Write object " + content.printContentObject() + " to " + writeServerId + " response is " + returnMessage.getMessageType());
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block				
+					e.printStackTrace();
+				}
+				
+				try {
+					Integer readServerId = (key + randGen.nextInt(3)) % Constant.hashBase;
+					MessageObject readMessage = new MessageObject();
+					readMessage.setContentObject(content);
+					readMessage.setMessageType(MessageType.CLIENT_GET_OBJECT);
+					writeToServerPipes.get(readServerId).writeObject(readMessage);
+					
+					MessageObject returnMessage = (MessageObject) readFromServerPipes.get(readServerId).readObject();
+					
+					System.out.println("Read object " + key + " from " + readServerId + " is " + returnMessage.printMessageObject());
+					
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block				
+					e.printStackTrace();
+				}
+				
+				round++;
+			}
+		}		
 	}
 
 }

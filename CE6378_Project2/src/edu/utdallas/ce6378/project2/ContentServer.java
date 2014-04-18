@@ -192,7 +192,8 @@ public class ContentServer {
 							out.writeObject(returnMessage);
 						}					
 					}catch (EOFException eofex) {
-						eofex.printStackTrace(System.err);
+						//Ignore the EOFException for now.	
+						//eofex.printStackTrace(System.err);
 					}catch (IOException ioex) {
 						ioex.printStackTrace(System.err);
 					}catch (ClassNotFoundException cnfex) {
@@ -273,6 +274,7 @@ public class ContentServer {
 		
 		newMessage.setFromServerId(nodeId);
 		newMessage.setMessageType(MessageType.SERVER_UNAVAILABLE);
+		newMessage.setTimestamp(getLogicTimestamp());
 		newMessage.setContentObject(null);
 		
 		return newMessage;
@@ -311,6 +313,7 @@ public class ContentServer {
 				ContentObject obj = container.get(key);
 				
 				if (obj == null || obj.getTimestamp().compareTo(contentObject.getTimestamp()) < 0) {
+					System.out.println("Server "+ nodeId + " store object " + contentObject.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
 					container.put(key, contentObject);
 				}
 				
@@ -345,7 +348,10 @@ public class ContentServer {
 			
 			//If server agrees to write this value.
 			if (returnMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_OK) {
+				System.out.println("Server "+ nodeId + " polled server " + serverId + " at time " + this.logicTimestamp.printTimestamp()+ " for writing object " + message.getContentObject().getObjId() + " results ok.");
 				result = true;
+			} else {
+				System.out.println("Server "+ nodeId + " polled server " + serverId + " at time " + this.logicTimestamp.printTimestamp()+ " for writing object " + message.getContentObject().getObjId() + " results failed.");
 			}
 			
 			this.tickMyClock();
@@ -400,7 +406,9 @@ public class ContentServer {
 
 	private MessageObject handleClientPutRequest(ContentObject objectParam) {
 		// TODO Auto-generated method stub
-		boolean putResultOk = false;
+		boolean putResultPOk = false;
+		boolean putResultSOk = false;
+		boolean putResultTOk = false;
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
@@ -422,24 +430,26 @@ public class ContentServer {
 			//to other severs and wait for an answer.
 			ConcurrentHashMap<Integer, ContentObject> container = null;
 			if (primaryHashValue != this.nodeId) {
-				putResultOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+				putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
 			} else {
 				container = this.primaryObjects;
 			}
 			
 			if (secondHashvalue != this.nodeId) {
-				putResultOk = putResultOk || pollServerForWriteAgreement(message, secondHashvalue) ;
+				//Preventing the logic operator short circuiting, use an additional logic variable 
+				putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
 			} else {
 				container = this.secondaryObjects;
 			}
 			
 			if (tertiaryHashvalue != this.nodeId) {
-				putResultOk = putResultOk || pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+				//Preventing the logic operator short circuiting, use an additional logic variable
+				putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
 			} else {
 				container = this.tertiaryObjects;
 			}
 			
-			if (putResultOk) {
+			if (putResultPOk || putResultSOk || putResultTOk) {
 				if (container.get(key) == null || container.get(key).getTimestamp().compareTo(objectParam.getTimestamp()) < 0 ) {
 					System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
 					container.put(key, objectParam);
@@ -449,7 +459,7 @@ public class ContentServer {
 		
 		MessageObject newMessage = new MessageObject();
 		
-		if (putResultOk) {
+		if (putResultPOk || putResultSOk || putResultTOk) {
 			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);
 			newMessage.setContentObject(null);
 			newMessage.setFromServerId(nodeId);
@@ -474,7 +484,7 @@ public class ContentServer {
 				returnObject = this.primaryObjects.get(key); 
 			} else if (secondHashvalue.equals(nodeId)) {
 				returnObject = this.secondaryObjects.get(key); 
-			} else if (tertiaryHashvalue.equals(key)){
+			} else if (tertiaryHashvalue.equals(nodeId)){
 				returnObject = this.tertiaryObjects.get(key);
 			}
 		}
@@ -482,6 +492,7 @@ public class ContentServer {
 		MessageObject newMessage = new MessageObject();
 		
 		newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
+		newMessage.setTimestamp(getLogicTimestamp());
 		newMessage.setContentObject(returnObject);
 		
 		return newMessage;
