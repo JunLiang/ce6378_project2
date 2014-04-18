@@ -189,6 +189,14 @@ public class ContentServer {
 						MessageObject returnMessage = handleIncomeMessage(oMessage);
 						
 						if (returnMessage != null) {
+							//bump up time stamp
+							if (serverStatus != ServerStatus.SERVER_FAIL) {
+								//If server did not fail, then tick the clock.
+								tickMyClock();
+							}
+							returnMessage.setTimestamp(getLogicTimestamp());
+							returnMessage.setFromServerId(getNodeId());
+							
 							out.writeObject(returnMessage);
 						}					
 					}catch (EOFException eofex) {
@@ -346,6 +354,10 @@ public class ContentServer {
 			
 			MessageObject returnMessage = (MessageObject) reader.readObject();
 			
+			if (returnMessage.getMessageType() != MessageType.SERVER_UNAVAILABLE) {
+				adjustMyClock(returnMessage.getTimestamp());
+			}
+			
 			//If server agrees to write this value.
 			if (returnMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_OK) {
 				System.out.println("Server "+ nodeId + " polled server " + serverId + " at time " + this.logicTimestamp.printTimestamp()+ " for writing object " + message.getContentObject().getObjId() + " results ok.");
@@ -494,6 +506,7 @@ public class ContentServer {
 		newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
 		newMessage.setTimestamp(getLogicTimestamp());
 		newMessage.setContentObject(returnObject);
+		newMessage.setFromServerId(getNodeId());
 		
 		return newMessage;
 	}
@@ -518,17 +531,7 @@ public class ContentServer {
 		Thread listenerThread = new Thread(listener);
 		
 		listenerThread.start();
-
-		/*now wait for other servers to come up before 
-		 * creating connections to other servers */
-		
-		try {
-			Thread.sleep(6000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace(System.err);
-		}
-		
+				
 		//establishConnectionToServers();	
 	}
 
