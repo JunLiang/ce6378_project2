@@ -9,6 +9,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 
+/*
+ * 
+ * Server control utility
+ * 
+ * Send control messages: FAIL, ISOLATE to server and group of servers.
+ * 
+ */
 public class ServerControlUtil {
 	
 	HashMap<Integer, Socket> serverSockets ;
@@ -24,9 +31,11 @@ public class ServerControlUtil {
 	
 	private void establishConnectionToServers() throws UnknownHostException, IOException {
 		//save all the connections to the other servers 
-		for (NodeConfiguration aConfig : Main.getAllServerNodes().values()) {			
+		for (NodeConfiguration aConfig : Main.getAllServerNodes().values()) {
+			
 			Socket socket = new Socket(aConfig.getHostName(), aConfig.getPortNo());
 			this.serverSockets.put(aConfig.getNodeId(), socket);
+			
 			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 			this.writeToServerPipes.put(aConfig.getNodeId(), out);
 			
@@ -34,13 +43,17 @@ public class ServerControlUtil {
 			this.readFromServerPipes.put(aConfig.getNodeId(), in);
 		}
 	}
+	
 	public void simulate() {
-		//Wait for all server to come online first
-		//sleep for a few seconds here.
+
 		
 		Scanner consoleIn = null;
 		
 		try {
+			
+			//Wait for all server to come online first
+			//sleep for a few seconds here.
+			
 			Thread.sleep(6000);
 
 			establishConnectionToServers();
@@ -81,7 +94,7 @@ public class ServerControlUtil {
 						for (Integer serverId1 : set1){
 							for (Integer serverId2 : set2) {
 								
-								System.out.println("Server 1: "+ serverId1 + " Server 2: "+serverId2);
+								System.out.println("Server_1: "+ serverId1 + " Server_2: "+serverId2);
 								
 								MessageObject newMessage1 = new MessageObject();
 								newMessage1.setFromServerId(serverId1);
@@ -96,7 +109,7 @@ public class ServerControlUtil {
 								newMessage2.setFromServerId(serverId2);
 								newMessage2.setMessageType(MessageType.SERVER_CONTROL_ISOLATE);
 								
-								this.writeToServerPipes.get(serverId1).writeObject(newMessage1);
+								this.writeToServerPipes.get(serverId1).writeObject(newMessage2);
 								MessageObject returnMessage2 = (MessageObject)this.readFromServerPipes.get(serverId1).readObject();
 								
 								System.out.println(returnMessage2.printMessageObject());
@@ -169,7 +182,6 @@ public class ServerControlUtil {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-
 	}
 
 }

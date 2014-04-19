@@ -179,33 +179,35 @@ public class ContentServer {
 				
 				while (!terminate) {
 					try {
-						MessageObject oMessage = (MessageObject)in.readObject();
-						
-						if (oMessage != null && getServerStatus() != ServerStatus.SERVER_FAIL) {
-							/*Incoming message, let's adjust my clock*/
-							tickMyClock();
-							adjustMyClock(oMessage.getTimestamp());
-						}
-						
-						if (oMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_END) {
-							//This is a connection established between servers for 
-							//write synchronization. Now write finished, terminate
-							terminate = true;
-						}
-						
-						MessageObject returnMessage = handleIncomeMessage(oMessage);
-						
-						if (returnMessage != null) {
-							//bump up time stamp
-							if (serverStatus != ServerStatus.SERVER_FAIL) {
-								//If server did not fail, then tick the clock.
-								tickMyClock();
-							}
-							returnMessage.setTimestamp(getLogicTimestamp());
-							returnMessage.setFromServerId(getNodeId());
+							MessageObject oMessage = (MessageObject)in.readObject();
 							
-							out.writeObject(returnMessage);
-						}					
+							if (oMessage != null && getServerStatus() != ServerStatus.SERVER_FAIL) {
+								/*Incoming message, let's adjust my clock*/
+								tickMyClock();
+								adjustMyClock(oMessage.getTimestamp());
+							}
+							
+							if (oMessage.getMessageType() == MessageType.SERVER_TO_SERVER_PUT_END) {
+								//This is a connection established between servers for 
+								//write synchronization. Now write finished, terminate.
+								//Do not reply anything here, even unavailable message is not needed.
+								terminate = true;
+							} else {
+							
+								MessageObject returnMessage = handleIncomeMessage(oMessage);
+								
+								if (returnMessage != null) {
+									//bump up time stamp
+									if (serverStatus != ServerStatus.SERVER_FAIL) {
+										//If server did not fail, then tick the clock.
+										tickMyClock();
+									}
+									returnMessage.setTimestamp(getLogicTimestamp());
+									returnMessage.setFromServerId(getNodeId());
+									
+									out.writeObject(returnMessage);
+							}
+						}
 					}catch (EOFException eofex) {
 						//Ignore the EOFException for now.	
 						//eofex.printStackTrace(System.err);

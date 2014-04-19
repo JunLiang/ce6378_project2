@@ -10,7 +10,7 @@ public class Constant {
 	
 	public static final Integer numberOfServers = 7;
 	
-	public static final Integer objectKeyRange = 10000;
+	public static final Integer objectKeyRange = 50;
 	
 	public static final Integer objectValueRange = 100000;
 
