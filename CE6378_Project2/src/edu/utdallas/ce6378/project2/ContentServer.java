@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashSet;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -35,6 +36,11 @@ public class ContentServer {
 	
 	private NodeConfiguration config;
 	
+	
+	
+	//Nodes that being cut off from current node.
+	HashSet<Integer> cutOffNodes;
+	
 	/*save the direct connections to other servers to 
 	 * initiate server to server communications.
 	 */
@@ -52,6 +58,7 @@ public class ContentServer {
 		serverSockets = new TreeMap<Integer, Socket> ();
 		/*outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
 		outboundSockets = new TreeMap<Integer, Socket>();*/
+		cutOffNodes = new HashSet<Integer>();
 	}
 	
 	public ContentServer () {
@@ -267,7 +274,10 @@ public class ContentServer {
 				//Handle this request type later, as crash recover is not yet required.
 				case SERVER_GET_OBJECTS :returnMessage = handleServerGetRequest(); break;
 				
+				//Server FAILURE simulation.
 				case SERVER_CONTROL_FAIL:returnMessage = handleSimulationFail(); break;
+				
+				case SERVER_CONTROL_ISOLATE : returnMessage = handleServerIsolate(oMessage.getFromServerId()); break;
 				
 				default : break;
 			}		
@@ -276,13 +286,32 @@ public class ContentServer {
 		return returnMessage;
 	}
 
-	private MessageObject handleSimulationFail() {
+	private synchronized MessageObject handleServerIsolate(Integer fromServerId) {
+		// TODO Auto-generated method stub
+		//synchronized to make sure isolation is in sync 
+		if (fromServerId != -1) {
+			this.cutOffNodes.add(fromServerId);
+		}
+		MessageObject newMessage = new MessageObject();
+		newMessage.setFromServerId(getNodeId());
+		newMessage.setMessageType(MessageType.SERVER_CUT_OFF_OK);
+		//newMessage.setTimestamp(logicTimestamp);
+		newMessage.setContentObject(null);
+		return newMessage;
+	}
+	
+	//Synchronized to change server status.
+	private synchronized MessageObject handleSimulationFail() {
 		// TODO Auto-generated method stub
 		MessageObject newMessage = new MessageObject();
 		
+		
+		this.serverStatus = ServerStatus.SERVER_FAIL;
+		
+		
 		newMessage.setFromServerId(nodeId);
 		newMessage.setMessageType(MessageType.SERVER_UNAVAILABLE);
-		newMessage.setTimestamp(getLogicTimestamp());
+		//newMessage.setTimestamp(getLogicTimestamp());
 		newMessage.setContentObject(null);
 		
 		return newMessage;
@@ -298,7 +327,7 @@ public class ContentServer {
 		// TODO Auto-generated method stub
 		MessageObject newMessage = new MessageObject();
 		newMessage.setFromServerId(nodeId);
-		newMessage.setTimestamp(logicTimestamp);
+		//newMessage.setTimestamp(logicTimestamp);
 		newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_FAIL);
 		
 		if (contentObject != null) {
@@ -442,21 +471,27 @@ public class ContentServer {
 			//to other severs and wait for an answer.
 			ConcurrentHashMap<Integer, ContentObject> container = null;
 			if (primaryHashValue != this.nodeId) {
-				putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+				if (!this.cutOffNodes.contains(primaryHashValue)) {
+					putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+				}
 			} else {
 				container = this.primaryObjects;
 			}
 			
 			if (secondHashvalue != this.nodeId) {
 				//Preventing the logic operator short circuiting, use an additional logic variable 
-				putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
+				if (!this.cutOffNodes.contains(secondHashvalue)) {
+					putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
+				}
 			} else {
 				container = this.secondaryObjects;
 			}
 			
 			if (tertiaryHashvalue != this.nodeId) {
 				//Preventing the logic operator short circuiting, use an additional logic variable
-				putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+				if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
+					putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+				}
 			} else {
 				container = this.tertiaryObjects;
 			}
@@ -466,15 +501,18 @@ public class ContentServer {
 					System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
 					container.put(key, objectParam);
 				}
+			} else {
+				System.out.println("Server "+ nodeId + " can not store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp() + " as consensus can not be reached.");
 			}
 		}
 		
 		MessageObject newMessage = new MessageObject();
-		
+		newMessage.setFromServerId(nodeId);
+		newMessage.setContentObject(objectParam);
 		if (putResultPOk || putResultSOk || putResultTOk) {
-			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);
-			newMessage.setContentObject(null);
-			newMessage.setFromServerId(nodeId);
+			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);			
+		} else {
+			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_FAIL);			
 		}
 		return newMessage;
 		
@@ -504,7 +542,7 @@ public class ContentServer {
 		MessageObject newMessage = new MessageObject();
 		
 		newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_READ_OK);
-		newMessage.setTimestamp(getLogicTimestamp());
+		//newMessage.setTimestamp(getLogicTimestamp());
 		newMessage.setContentObject(returnObject);
 		newMessage.setFromServerId(getNodeId());
 		

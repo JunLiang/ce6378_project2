@@ -7,6 +7,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 public class ContentClient {
@@ -14,6 +15,7 @@ public class ContentClient {
 	HashMap<Integer, Socket> serverSockets ;
 	HashMap<Integer, ObjectOutputStream> writeToServerPipes;
 	HashMap<Integer, ObjectInputStream> readFromServerPipes;
+
 	
 	Integer nodeId; //client node Id;
 	
@@ -21,7 +23,7 @@ public class ContentClient {
 		nodeId = localNodeConfig.getNodeId();
 		serverSockets = new HashMap<Integer, Socket> ();
 		writeToServerPipes = new HashMap<Integer, ObjectOutputStream> ();
-		readFromServerPipes = new HashMap<Integer, ObjectInputStream> ();
+		readFromServerPipes = new HashMap<Integer, ObjectInputStream> ();		
 	}
 
 	private void establishConnectionToServers() throws UnknownHostException, IOException {

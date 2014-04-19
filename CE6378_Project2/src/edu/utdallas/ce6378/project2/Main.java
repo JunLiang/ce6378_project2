@@ -81,24 +81,30 @@ public class Main {
 		
 		System.out.println("Node Id :" + localNodeId + " read " + Main.getAllServerNodes().size() + " server nodes " + Main.getAllClientNodes().size() + " client nodes.");
 
-		if (localNodeConfig != null) {
+		if (localNodeConfig != null || localNodeId.equals(-1)) {
 			
-			if (localNodeMode.equals(0)) {
-				ContentServer localNode;
-				try {
-					localNode = new ContentServer(localNodeConfig);
-					localNode.start();
-				} catch (UnknownHostException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+			if (localNodeId.equals(-1)) {
+				ServerControlUtil serverControl = new ServerControlUtil();
+				serverControl.simulate();
+				
+			}else { 			
+				if (localNodeMode.equals(0)) {
+					ContentServer localNode;
+					try {
+						localNode = new ContentServer(localNodeConfig);
+						localNode.start();
+					} catch (UnknownHostException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				} else {
+					ContentClient localNode;
+					localNode = new ContentClient(localNodeConfig);
+					localNode.simulate();
 				}
-			} else {
-				ContentClient localNode;
-				localNode = new ContentClient(localNodeConfig);
-				localNode.simulate();
 			}
 		}
 	}

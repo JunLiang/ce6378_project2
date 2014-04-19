@@ -35,6 +35,9 @@ public enum MessageType {
 	
 	SERVER_TO_SERVER_PUT_END,
 	
+	/*response to control messages*/
+	SERVER_CUT_OFF_OK,
+	
 	/*Only respond when server simulates failure*/
 	SERVER_UNAVAILABLE
 
