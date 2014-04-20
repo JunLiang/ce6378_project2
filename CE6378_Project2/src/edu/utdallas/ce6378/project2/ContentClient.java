@@ -107,7 +107,7 @@ public class ContentClient {
 			Integer round = 0;
 			
 
-			while (round < 100) {
+			while (round < 10000) {
 			
 				Integer key = randGen.nextInt(Constant.objectKeyRange);
 				Integer intValue = randGen.nextInt(Constant.objectValueRange);
