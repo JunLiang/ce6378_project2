@@ -101,8 +101,10 @@ public class Main {
 						e.printStackTrace();
 					}
 				} else {
-					ContentClient localNode;
-					localNode = new ContentClient(localNodeConfig);
+					//ContentClient localNode;
+					//localNode = new ContentClient(localNodeConfig);
+					InteractiveClient localNode;
+					localNode = new InteractiveClient(localNodeConfig);
 					localNode.simulate();
 				}
 			}
