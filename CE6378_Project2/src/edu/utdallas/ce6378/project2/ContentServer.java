@@ -459,52 +459,56 @@ public class ContentServer {
 			Integer secondHashvalue = (primaryHashValue + 1) % Constant.hashBase;
 			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase;
 			
-			MessageObject message = new MessageObject();
+			if (primaryHashValue.equals(nodeId) || secondHashvalue.equals(nodeId) || tertiaryHashvalue.equals(nodeId) ) {
+				//Only process object that can be stored by this server.
 			
-			Integer[] timeVector = new Integer [] {this.logicTimestamp.getTimeVector()[primaryHashValue], this.logicTimestamp.getTimeVector()[secondHashvalue], this.logicTimestamp.getTimeVector()[tertiaryHashvalue]};
-			
-			objectParam.getTimestamp().setTimeVector(timeVector);
-			
-			message.setContentObject(objectParam);
-			message.setFromServerId(nodeId);
-			message.setMessageType(MessageType.SERVER_PUT_OBJECT);
-			
-			//TODO, need a non blocking way to send the write request 
-			//to other severs and wait for an answer.
-			ConcurrentHashMap<Integer, ContentObject> container = null;
-			if (primaryHashValue != this.nodeId) {
-				if (!this.cutOffNodes.contains(primaryHashValue)) {
-					putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+				MessageObject message = new MessageObject();
+				
+				Integer[] timeVector = new Integer [] {this.logicTimestamp.getTimeVector()[primaryHashValue], this.logicTimestamp.getTimeVector()[secondHashvalue], this.logicTimestamp.getTimeVector()[tertiaryHashvalue]};
+				
+				objectParam.getTimestamp().setTimeVector(timeVector);
+				
+				message.setContentObject(objectParam);
+				message.setFromServerId(nodeId);
+				message.setMessageType(MessageType.SERVER_PUT_OBJECT);
+				
+				//TODO, need a non blocking way to send the write request 
+				//to other severs and wait for an answer.
+				ConcurrentHashMap<Integer, ContentObject> container = null;
+				if (primaryHashValue != this.nodeId) {
+					if (!this.cutOffNodes.contains(primaryHashValue)) {
+						putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+					}
+				} else {
+					container = this.primaryObjects;
 				}
-			} else {
-				container = this.primaryObjects;
-			}
-			
-			if (secondHashvalue != this.nodeId) {
-				//Preventing the logic operator short circuiting, use an additional logic variable 
-				if (!this.cutOffNodes.contains(secondHashvalue)) {
-					putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
+				
+				if (secondHashvalue != this.nodeId) {
+					//Preventing the logic operator short circuiting, use an additional logic variable 
+					if (!this.cutOffNodes.contains(secondHashvalue)) {
+						putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
+					}
+				} else {
+					container = this.secondaryObjects;
 				}
-			} else {
-				container = this.secondaryObjects;
-			}
-			
-			if (tertiaryHashvalue != this.nodeId) {
-				//Preventing the logic operator short circuiting, use an additional logic variable
-				if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
-					putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+				
+				if (tertiaryHashvalue != this.nodeId) {
+					//Preventing the logic operator short circuiting, use an additional logic variable
+					if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
+						putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+					}
+				} else {
+					container = this.tertiaryObjects;
 				}
-			} else {
-				container = this.tertiaryObjects;
-			}
-			
-			if (putResultPOk || putResultSOk || putResultTOk) {
-				if (container.get(key) == null || container.get(key).getTimestamp().compareTo(objectParam.getTimestamp()) < 0 ) {
-					System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
-					container.put(key, objectParam);
+				
+				if (putResultPOk || putResultSOk || putResultTOk) {
+					if (container.get(key) == null || container.get(key).getTimestamp().compareTo(objectParam.getTimestamp()) < 0 ) {
+						System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
+						container.put(key, objectParam);
+					}
+				} else {
+					System.out.println("Server "+ nodeId + " can not store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp() + " as consensus can not be reached.");
 				}
-			} else {
-				System.out.println("Server "+ nodeId + " can not store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp() + " as consensus can not be reached.");
 			}
 		}
 		
