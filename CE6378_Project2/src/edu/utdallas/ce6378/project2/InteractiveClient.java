@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Random;
 import java.io.BufferedReader;
 import java.io.InputStreamReader; 
-import java.lang.Math;
-
+//import java.lang.Math;
+import java.lang.*;
 //import edu.utdallas.ce6378.project2.Constant;
 
 //
@@ -101,7 +101,7 @@ public class InteractiveClient {
 		private String Cli_Operation_Type = null;
 		private Integer Cli_Object_Key = -1;
 		private Integer Cli_Object_Value = -1;
-		private Integer Cli_Total_Num_Put_Request = -1;
+		private Integer Cli_Total_Num_Request = -1;
 		private Integer writeServerId = -1;
 		private Integer HashSocketKey = -1;
 		private Integer round = 0;
@@ -115,11 +115,16 @@ public class InteractiveClient {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));  
 			String line = null;	
 			Random randGen = new Random();
-			
+			long lbeginTime = 0;
+			long lendTime = 0;
+			long lresponseTime = 0;
 			try {
 				//Create a TCP/IP connection between the client and each server
 					while(true)
 					{
+						Cli_Total_Num_Request = 0;
+						Cli_Operation_Type = null;
+						
 						System.out.print("User Input: ");  
 						line = reader.readLine();  
 						
@@ -135,11 +140,11 @@ public class InteractiveClient {
 								Cli_Object_Key		= Integer.valueOf(fields[2].trim());
 								Cli_Object_Value	= Integer.valueOf(fields[3].trim());
 							}
-							else if(Cli_Operation_Type.equals("wreq")) //generate write request operation
+							else if((Cli_Operation_Type.equals("wreq")) || (Cli_Operation_Type.equals("rreq"))) //generate write request operation
 							{
 								Cli_Object_Key		= Integer.valueOf(fields[2].trim());
-								Cli_Total_Num_Put_Request = Integer.valueOf(fields[3].trim());
-								System.out.println(" Cli_Server_Index=" + Cli_Server_Index + " Cli_Operation_Type=" + Cli_Operation_Type + " Cli_Object_Key="+ Cli_Object_Key + " Cli_Total_Num_Put_Request=" + Cli_Total_Num_Put_Request);
+								Cli_Total_Num_Request = Integer.valueOf(fields[3].trim());
+								System.out.println(" Cli_Server_Index=" + Cli_Server_Index + " Cli_Operation_Type=" + Cli_Operation_Type + " Cli_Object_Key="+ Cli_Object_Key + " Cli_Total_Num_Put_Request=" + Cli_Total_Num_Request);
 							}
 							else
 							{
@@ -189,9 +194,13 @@ public class InteractiveClient {
 					    	if(Cli_Operation_Type.equals("put") || Cli_Operation_Type.equals("get")) 
 						    {
 								
-								if(Cli_Operation_Type.equals("put"))  //Insert/Write an object to a server
+								
+					    		if(Cli_Operation_Type.equals("put"))  //Insert/Write an object to a server
 								{
 									System.out.println("[debug]Cli_Operation_Type is put");
+
+									//For put operation, we need to collect the response time
+					    			lbeginTime = System.currentTimeMillis();//get system time at the beginning of an operation
 									
 									//Build message and send it to server
 									MessageObject newMessage = new MessageObject();
@@ -215,14 +224,18 @@ public class InteractiveClient {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}	
+									lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
+									lresponseTime = lendTime - lbeginTime;
 									
-									System.out.println("\n [debug]Client recv msg: " + " MsgType=" + RecvMessage.getMessageType());
+									System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime + "ms");
 									
 								}
 								else if(Cli_Operation_Type.equals("get")) //Read an object from a server
 								{
 									System.out.println("[debug]Cli_Operation_Type is Get");
-									
+									//for get operation, we need to collect the response time
+									lbeginTime = System.currentTimeMillis();//get system time at the beginning of an operation
+
 									//Build message and send it to server
 									MessageObject newMessage = new MessageObject();
 									ContentObject newContent = new ContentObject();
@@ -243,28 +256,29 @@ public class InteractiveClient {
 									if(RecvMessage.getContentObject() == null)
 									{
 										System.out.println("\n [debug]Client recv msg: " + " MsgType= " + RecvMessage.getMessageType());
-										System.out.println("\n Get operation result is " + "Object does NOT exist");
+										System.out.println("\n Get operation Result  " + "Object does NOT exist");
 										
 									}
 									else
 									{
-										System.out.println("\n [debug]Client recv msg: " + " MsgType= " + RecvMessage.getMessageType() + " ObjValue=" + RecvMessage.getContentObject().getIntValue());
-										System.out.println("\n Get operation result is" + " ObjId=" + Cli_Object_Key + " ObjValue=" + RecvMessage.getContentObject().getIntValue());
+										lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
+										lresponseTime = lendTime - lbeginTime;
+										//System.out.println("\n [debug]Client recv msg: " + " MsgType= " + RecvMessage.getMessageType() + " ObjValue=" + RecvMessage.getContentObject().getIntValue());
+										System.out.println("\n Get Operation Result:" +  " MsgType= " + RecvMessage.getMessageType() +" ObjId=" + Cli_Object_Key + " ObjValue=" + RecvMessage.getContentObject().getIntValue() + " ResponseTime=" + lresponseTime + "ms");
 									}
 								}
 						    }
 							else if(Cli_Operation_Type.equals("wreq")) //write the same object concurrently by different clients
 							{
-								//System.out.println("enter into wreq implement branch ");
 								//command format: server_id,wreq,obj_id,TimesofRequest
 								round = 0;
-								while (round < Cli_Total_Num_Put_Request)
+								while (round < Cli_Total_Num_Request) //generate write request
 								{
-									System.out.println("wreq implement branch ");
 									round++;
-									//Cli_Object_Value = randGen.nextInt(Constant.objectKeyRange);
 									Cli_Object_Value = randGen.nextInt(Constant.objectValueRange);
 									try {
+										lbeginTime = System.currentTimeMillis();//get system time at the beginning of an operation
+
 										//Build message and send it to server
 										MessageObject newMessage = new MessageObject();
 										MessageObject RecvMessage = new MessageObject();
@@ -283,18 +297,67 @@ public class InteractiveClient {
 								
 										try {
 												RecvMessage = (MessageObject)readFromServerPipes.get(writeServerId).readObject();
+												
 											} catch (ClassNotFoundException e) {
 											// TODO Auto-generated catch block
 											e.printStackTrace();
 										}	
-								
-										System.out.println("\n [debug]Client recv msg: " + " MsgType=" + RecvMessage.getMessageType());
+										
+										lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
+										lresponseTime = lendTime - lbeginTime;
+										System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime +"ms");
 
 									}
 									catch (IOException e) 
 									{ 
 										e.printStackTrace();  
 									}  
+								}
+							}
+							else if(Cli_Operation_Type.equals("rreq")) //generate read request
+							{
+								//command format: server_id,wreq,obj_id,TimesofRequest
+								round = 0;
+								while (round < Cli_Total_Num_Request)
+								{
+									round++;
+
+									//System.out.println("[debug]Cli_Operation_Type is rreq");
+									//for get operation, we need to collect the response time
+									lbeginTime = System.currentTimeMillis();//get system time at the beginning of an operation
+
+									//Build message and send it to server
+									MessageObject newMessage = new MessageObject();
+									ContentObject newContent = new ContentObject();
+									MessageObject RecvMessage = new MessageObject();
+									newMessage.setMessageType(MessageType.CLIENT_GET_OBJECT);
+									newMessage.setContentObject(newContent);
+									newContent.setObjId(Cli_Object_Key);
+									System.out.println("[debug]writeServerId = " + writeServerId);
+									writeToServerPipes.get(writeServerId).writeObject(newMessage);
+									System.out.println("\n [debug]Client send msg: " + " MsgType=" + newMessage.getMessageType() + " ObjId=" + newMessage.getContentObject().getObjId());
+									
+									try {
+										RecvMessage = (MessageObject)readFromServerPipes.get(writeServerId).readObject();
+									} catch (ClassNotFoundException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}	
+									if(RecvMessage.getContentObject() == null)
+									{
+										System.out.println("\n [debug]Client recv msg: " + " MsgType= " + RecvMessage.getMessageType());
+										System.out.println("\n Get operation Result  " + "Object does NOT exist");
+										
+									}
+									else
+									{
+										lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
+										lresponseTime = lendTime - lbeginTime;
+										//System.out.println("\n [debug]Client recv msg: " + " MsgType= " + RecvMessage.getMessageType() + " ObjValue=" + RecvMessage.getContentObject().getIntValue());
+										System.out.println("\n Get Operation Result:" +  " MsgType= " + RecvMessage.getMessageType() +" ObjId=" + Cli_Object_Key + " ObjValue=" + RecvMessage.getContentObject().getIntValue() + " ResponseTime=" + lresponseTime + "ms");
+									}
+								
+									
 								}
 							}
 							else
