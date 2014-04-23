@@ -100,6 +100,12 @@ public class Main {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+				} else if (localNodeMode.equals(2)){
+					AutomatedClient localNode;
+					localNode = new AutomatedClient(localNodeConfig);
+					//InteractiveClient localNode;
+					//localNode = new InteractiveClient(localNodeConfig);
+					localNode.simulate();
 				} else {
 					//ContentClient localNode;
 					//localNode = new ContentClient(localNodeConfig);

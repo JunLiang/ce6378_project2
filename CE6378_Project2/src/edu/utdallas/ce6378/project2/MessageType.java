@@ -11,6 +11,8 @@ public enum MessageType {
 	
 	SERVER_PUT_OBJECT,
 	
+	SERVER_COMMIT_OBJECT,
+	
 	SERVER_GET_OBJECTS,
 	
 	/*Server control Types*/
@@ -32,6 +34,8 @@ public enum MessageType {
 	SERVER_TO_SERVER_PUT_OK,
 	
 	SERVER_TO_SERVER_PUT_FAIL,
+	
+	SERVER_TO_SERVER_COMMIT_OK,
 	
 	SERVER_TO_SERVER_PUT_END,
 	

@@ -7,9 +7,12 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 
 public class ContentServer {
@@ -18,9 +21,11 @@ public class ContentServer {
 	
 	//Content stored on each server.
 	
-	private ConcurrentHashMap<Integer, ContentObject> primaryObjects;
-	private ConcurrentHashMap<Integer, ContentObject> secondaryObjects;
-	private ConcurrentHashMap<Integer, ContentObject> tertiaryObjects;
+	private ConcurrentSkipListMap<Integer, ContentObject> objectsStorage;
+	//the primary secondary and tertiary objects are 
+	//used as buffers of write operations.
+	private ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> > bufferStorage;
+
 	
 	//This is used to store the socket of other servers.
 	//These sockets should be available at all time
@@ -51,10 +56,10 @@ public class ContentServer {
 		// TODO Auto-generated constructor stub
 		config = localNodeConfig;
 		nodeId = localNodeConfig.getNodeId();
-		logicTimestamp = new VectorTimestamp(Constant.numberOfServers);		
-		primaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
-		secondaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
-		tertiaryObjects = new ConcurrentHashMap<Integer, ContentObject> ();
+		logicTimestamp = new VectorTimestamp(Constant.numberOfServers);
+		objectsStorage = new ConcurrentSkipListMap<Integer, ContentObject> ();
+		bufferStorage = new ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> >();
+
 		serverSockets = new TreeMap<Integer, Socket> ();
 		/*outboundPipes = new TreeMap<Integer,ObjectOutputStream>();
 		outboundSockets = new TreeMap<Integer, Socket>();*/
@@ -73,32 +78,16 @@ public class ContentServer {
 		this.nodeId = nodeId;
 	}
 
-	public ConcurrentHashMap<Integer, ContentObject> getPrimaryObjects() {
-		return primaryObjects;
+	public ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> > getPrimaryObjects() {
+		return bufferStorage;
 	}
 
 	public void setPrimaryObjects(
-			ConcurrentHashMap<Integer, ContentObject> primaryObjects) {
-		this.primaryObjects = primaryObjects;
+			ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> > primaryObjects) {
+		this.bufferStorage = primaryObjects;
 	}
 
-	public ConcurrentHashMap<Integer, ContentObject> getSecondaryObjects() {
-		return secondaryObjects;
-	}
 
-	public void setSecondaryObjects(
-			ConcurrentHashMap<Integer, ContentObject> secondaryObjects) {
-		this.secondaryObjects = secondaryObjects;
-	}
-
-	public ConcurrentHashMap<Integer, ContentObject> getTertiaryObjects() {
-		return tertiaryObjects;
-	}
-
-	public void setTertiaryObjects(
-			ConcurrentHashMap<Integer, ContentObject> tertiaryObjects) {
-		this.tertiaryObjects = tertiaryObjects;
-	}
 
 	public TreeMap<Integer, Socket> getServerSockets() {
 		return serverSockets;
@@ -273,6 +262,8 @@ public class ContentServer {
 				
 				case SERVER_PUT_OBJECT :returnMessage = handleServerPutRequest(oMessage.getContentObject()); break;
 				
+				case SERVER_COMMIT_OBJECT :returnMessage = handleServerCommitRequest(oMessage.getContentObject()); break;
+				
 				//Handle this request type later, as crash recover is not yet required.
 				case SERVER_GET_OBJECTS :returnMessage = handleServerGetRequest(); break;
 				
@@ -286,6 +277,20 @@ public class ContentServer {
 		}		
 		
 		return returnMessage;
+	}
+
+	private MessageObject handleServerCommitRequest(ContentObject contentObject) {
+		MessageObject newMessage = new MessageObject();
+		newMessage.setFromServerId(nodeId);
+		//newMessage.setTimestamp(logicTimestamp);
+		newMessage.setMessageType(MessageType.SERVER_TO_SERVER_COMMIT_OK);
+		newMessage.setContentObject(null);
+		
+		if (contentObject != null) {			
+			this.commitWriteOperation(contentObject);			
+		}
+		
+		return newMessage;
 	}
 
 	private synchronized MessageObject handleServerIsolate(Integer fromServerId) {
@@ -324,7 +329,59 @@ public class ContentServer {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+	
+	private synchronized void commitWriteOperation(ContentObject thisObject) {
+		//This is the part where the buffer gets flushed into the storage
+		
+		VectorTimestamp timestamp = thisObject.getTimestamp();
+		Integer key = thisObject.getObjId();
+		
+		TreeMap<VectorTimestamp, ContentObject> objBuffer = this.bufferStorage.get(key);
+		
+			if (objBuffer != null) {
+				for (Iterator<Map.Entry<VectorTimestamp, ContentObject> > it = objBuffer.entrySet().iterator(); it.hasNext();) {
+					ContentObject object = it.next().getValue();
+					if (object != null) {
+						VectorTimestamp histTimestamp = object.getTimestamp();
+						Integer primaryHashValue = key % Constant.hashBase;
+						Integer secondaryHashValue = (primaryHashValue + 1) % Constant.hashBase;
+						Integer tertiaryHashValue = (secondaryHashValue + 1) % Constant.hashBase;
+						
+						/*if ( timestamp.getTimeVector()[0] < this.logicTimestamp.getTimeVector()[primaryHashValue] &&
+								timestamp.getTimeVector()[1] < this.logicTimestamp.getTimeVector()[secondaryHashValue] &&
+								timestamp.getTimeVector()[2] < this.logicTimestamp.getTimeVector()[tertiaryHashValue]) {*/
+						if (histTimestamp.compareTo(timestamp) <= 0) {							
+							this.objectsStorage.put(key, object);
+							System.out.println("Server "+this.nodeId + " store " + object.printContentObject() + " at time " + this.logicTimestamp.printTimestamp());							
+							it.remove();
+						}
+					}
+				}
+			}
+			
+			if (objBuffer != null && objBuffer.size() == 0) {
+				this.bufferStorage.remove(key);
+			}
+		
+		/*for (Iterator< Map.Entry<VectorTimestamp, HashMap<Integer, ContentObject>>> it = this.bufferStorage.entrySet().iterator(); it.hasNext();) {
+			HashMap<Integer, ContentObject> objBuffer = it.next().getValue();
+			if (objBuffer.size() == 0) {
+				it.remove();
+			}
+		}*/
+	}
+	
+	private synchronized void addContentObjectToBuffer(ContentObject contentObject) {
+		TreeMap<VectorTimestamp, ContentObject> objBuffer = this.bufferStorage.get(contentObject.getObjId());
+		
+		if (objBuffer == null) {
+			objBuffer = new TreeMap<VectorTimestamp, ContentObject>();
+			this.bufferStorage.put(contentObject.getObjId(), objBuffer);
+		}
+		System.out.println("Server "+ nodeId + " buffer object " + contentObject.printContentObject() + " at time " + this.logicTimestamp.printTimestamp());
+		objBuffer.put(contentObject.getTimestamp(), contentObject);
+		
+	}
 	private MessageObject handleServerPutRequest(ContentObject contentObject) {
 		// TODO Auto-generated method stub
 		MessageObject newMessage = new MessageObject();
@@ -338,29 +395,123 @@ public class ContentServer {
 			Integer secondHashvalue = (primaryHashValue + 1) % 7;
 			Integer tertiaryHashvalue = (secondHashvalue + 1) % 7;
 			
-			ConcurrentHashMap<Integer, ContentObject> container = null;
+			//ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> > container = this.bufferStorage;
 			
-			if (primaryHashValue.equals(nodeId)) {
-				container = this.primaryObjects;
+			/*if (primaryHashValue.equals(nodeId)) {
+				container = this.bufferStorage;
 			} else if ( secondHashvalue.equals(nodeId)) {
 				container = this.secondaryObjects;
 			} else if ( tertiaryHashvalue.equals(nodeId)) {
 				container = this.tertiaryObjects;
-			}
+			}*/
 			
-			if (container != null) {
-				ContentObject obj = container.get(key);
+			//if (container != null) {
+				//ContentObject obj = container.get(key);
+				/*TreeMap<VectorTimestamp, ContentObject> objBuffer = container.get(contentObject.getObjId());
 				
-				if (obj == null || obj.getTimestamp().compareTo(contentObject.getTimestamp()) < 0) {
-					System.out.println("Server "+ nodeId + " store object " + contentObject.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
-					container.put(key, contentObject);
+				if (objBuffer == null) {
+					objBuffer = new TreeMap<VectorTimestamp, ContentObject>();
+					container.put(contentObject.getObjId(), objBuffer);
 				}
+				System.out.println("Server "+ nodeId + " buffer object " + contentObject.printContentObject() + " at time " + this.logicTimestamp.printTimestamp());
+				objBuffer.put(contentObject.getTimestamp(), contentObject);*/
+
+				/*if (obj == null || obj.getTimestamp().compareTo(contentObject.getTimestamp()) < 0) {
+					System.out.println("Server "+ nodeId + " store object " + contentObject.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
+					//container.put(key, contentObject);
+					this.commitWriteOperation(container, contentObject);
+				}*/
 				
-				newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_OK);
-			}
+			this.addContentObjectToBuffer(contentObject);
+			newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_OK);
+			//}
 		}
 		
 		return newMessage;
+	}
+
+	private boolean pollServerForWriteCommit(MessageObject message, Integer serverId) {
+		
+		boolean result = false;
+		
+		Socket commPort = null;
+		ObjectInputStream reader = null;
+		ObjectOutputStream writer = null; 
+		
+		try {
+			this.tickMyClock();
+			
+			//Create a SERVER to SERVER connection (this connection is not needed to be permanent, 
+			//Once the message exchange finished, bring it down.
+			
+			commPort = new Socket(Main.getAllServerNodes().get(serverId).getHostName(), Main.getAllServerNodes().get(serverId).getPortNo());
+			writer = new ObjectOutputStream (commPort.getOutputStream());
+			reader = new ObjectInputStream (commPort.getInputStream());
+			
+			writer.writeObject(message);
+			
+			MessageObject returnMessage = (MessageObject) reader.readObject();
+			
+			if (returnMessage.getMessageType() != MessageType.SERVER_UNAVAILABLE) {
+				adjustMyClock(returnMessage.getTimestamp());
+			}
+			
+			//If server agrees to write this value.
+			if (returnMessage.getMessageType() == MessageType.SERVER_TO_SERVER_COMMIT_OK) {
+				System.out.println("Server "+ nodeId + " polled server " + serverId + " at time " + this.logicTimestamp.printTimestamp()+ " for commit object " + message.getContentObject().getObjId() + " results ok.");
+				result = true;
+			} else {
+				System.out.println("Server "+ nodeId + " polled server " + serverId + " at time " + this.logicTimestamp.printTimestamp()+ " for commit object " + message.getContentObject().getObjId() + " results failed.");
+			}
+			
+			this.tickMyClock();
+			
+			MessageObject newMessage = new MessageObject();
+			newMessage.setFromServerId(getNodeId());
+			newMessage.setMessageType(MessageType.SERVER_TO_SERVER_PUT_END);
+			newMessage.setTimestamp(getLogicTimestamp());
+			newMessage.setContentObject(null);
+			
+			//Send this connection the termination message,
+			//so the other server does not have to busy wait anymore.
+			writer.writeObject(newMessage);
+			
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace(System.err);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace(System.err);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}				
+			if (commPort != null) {
+				try {
+					commPort.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}
+			if (writer != null) {
+				try {
+					writer.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace(System.err);
+				}
+			}			
+		}
+		return result;		
 	}
 	
 	private boolean pollServerForWriteAgreement(MessageObject message, Integer serverId) {
@@ -452,6 +603,9 @@ public class ContentServer {
 		boolean putResultPOk = false;
 		boolean putResultSOk = false;
 		boolean putResultTOk = false;
+		
+		Integer serverMessagesExchanged = 0;
+		
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
@@ -460,52 +614,98 @@ public class ContentServer {
 			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase;
 			
 			if (primaryHashValue.equals(nodeId) || secondHashvalue.equals(nodeId) || tertiaryHashvalue.equals(nodeId) ) {
+				
+				//Set the object time stamp based on current logical clock values.
+
+				Integer[] timeVector = new Integer [] {this.logicTimestamp.getTimeVector()[primaryHashValue], this.logicTimestamp.getTimeVector()[secondHashvalue], this.logicTimestamp.getTimeVector()[tertiaryHashvalue]};				
+				objectParam.getTimestamp().setTimeVector(timeVector);
+				
+				//TODO, need a non blocking way to send the write request 
+				//to other severs and wait for an answer.
+				/*ConcurrentSkipListMap<Integer, TreeMap<VectorTimestamp, ContentObject> > container = this.bufferStorage;				
+
+				System.out.println("Server "+ nodeId + " buffer object " + objectParam.printContentObject() + " at time " + this.logicTimestamp.printTimestamp());
+				//container.put(key, objectParam);
+				//add write request to buffer. Commit write only when the current time stamp is larger.
+
+				TreeMap<VectorTimestamp, ContentObject> objBuffer = container.get(key);
+				if (objBuffer == null) {
+					objBuffer = new TreeMap<VectorTimestamp, ContentObject> ();
+					container.put(key, objBuffer);
+				}
+				objBuffer.put(objectParam.getTimestamp(), objectParam);*/
+				
+				this.addContentObjectToBuffer(objectParam);
+				
 				//Only process object that can be stored by this server.
 			
 				MessageObject message = new MessageObject();
-				
-				Integer[] timeVector = new Integer [] {this.logicTimestamp.getTimeVector()[primaryHashValue], this.logicTimestamp.getTimeVector()[secondHashvalue], this.logicTimestamp.getTimeVector()[tertiaryHashvalue]};
-				
-				objectParam.getTimestamp().setTimeVector(timeVector);
-				
+								
 				message.setContentObject(objectParam);
 				message.setFromServerId(nodeId);
 				message.setMessageType(MessageType.SERVER_PUT_OBJECT);
 				
-				//TODO, need a non blocking way to send the write request 
-				//to other severs and wait for an answer.
-				ConcurrentHashMap<Integer, ContentObject> container = null;
-				if (primaryHashValue != this.nodeId) {
-					if (!this.cutOffNodes.contains(primaryHashValue)) {
-						putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+							
+				if (tertiaryHashvalue != this.nodeId) {
+					//Preventing the logic operator short circuiting, use an additional logic variable
+					if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
+						putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+						serverMessagesExchanged +=2;
 					}
-				} else {
-					container = this.primaryObjects;
-				}
+				} /*else {
+					container = this.tertiaryObjects;
+				}*/
 				
 				if (secondHashvalue != this.nodeId) {
 					//Preventing the logic operator short circuiting, use an additional logic variable 
 					if (!this.cutOffNodes.contains(secondHashvalue)) {
 						putResultSOk = pollServerForWriteAgreement(message, secondHashvalue) ;
+						serverMessagesExchanged +=2;
 					}
-				} else {
+				} /*else {
 					container = this.secondaryObjects;
-				}
-				
-				if (tertiaryHashvalue != this.nodeId) {
-					//Preventing the logic operator short circuiting, use an additional logic variable
-					if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
-						putResultTOk =  pollServerForWriteAgreement(message, tertiaryHashvalue) ;
+				}*/
+
+				if (primaryHashValue != this.nodeId) {
+					if (!this.cutOffNodes.contains(primaryHashValue)) {
+						putResultPOk = pollServerForWriteAgreement(message, primaryHashValue) ;
+						serverMessagesExchanged +=2;
 					}
-				} else {
-					container = this.tertiaryObjects;
-				}
+				} /*else {
+					container = this.bufferStorage;
+				}*/
 				
 				if (putResultPOk || putResultSOk || putResultTOk) {
-					if (container.get(key) == null || container.get(key).getTimestamp().compareTo(objectParam.getTimestamp()) < 0 ) {
-						System.out.println("Server "+ nodeId + " store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp());
-						container.put(key, objectParam);
+					MessageObject commitMessage = new MessageObject();
+					commitMessage.setMessageType(MessageType.SERVER_COMMIT_OBJECT);
+					commitMessage.setContentObject(objectParam);
+					commitMessage.setFromServerId(nodeId);
+					
+					if (tertiaryHashvalue != this.nodeId) {
+						//Preventing the logic operator short circuiting, use an additional logic variable
+						if (!this.cutOffNodes.contains(tertiaryHashvalue)) {
+							pollServerForWriteCommit(commitMessage, tertiaryHashvalue) ;
+							serverMessagesExchanged +=2;
+						}
 					}
+					
+					if (secondHashvalue != this.nodeId) {
+						//Preventing the logic operator short circuiting, use an additional logic variable 
+						if (!this.cutOffNodes.contains(secondHashvalue)) {
+							pollServerForWriteCommit(commitMessage, secondHashvalue) ;
+							serverMessagesExchanged +=2;
+						}
+					} 
+
+					if (primaryHashValue != this.nodeId) {
+						if (!this.cutOffNodes.contains(primaryHashValue)) {
+							pollServerForWriteCommit(commitMessage, primaryHashValue) ;
+							serverMessagesExchanged +=2;
+						}
+					} 
+					
+					commitWriteOperation(objectParam);
+					
 				} else {
 					System.out.println("Server "+ nodeId + " can not store object " + objectParam.getObjId() + " at time " + this.logicTimestamp.printTimestamp() + " as consensus can not be reached.");
 				}
@@ -515,6 +715,7 @@ public class ContentServer {
 		MessageObject newMessage = new MessageObject();
 		newMessage.setFromServerId(nodeId);
 		newMessage.setContentObject(objectParam);
+		newMessage.setServerMessagesExchanged(serverMessagesExchanged);
 		if (putResultPOk || putResultSOk || putResultTOk) {
 			newMessage.setMessageType(MessageType.SERVER_TO_CLIENT_PUT_OK);			
 		} else {
@@ -532,17 +733,18 @@ public class ContentServer {
 		if (objectParam != null) {
 			Integer key = objectParam.getObjId();
 			
-			Integer primaryHashValue = (key % Constant.hashBase );
+			/*Integer primaryHashValue = (key % Constant.hashBase );
 			Integer secondHashvalue = (primaryHashValue + 1) % Constant.hashBase ;
-			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase ;
+			Integer tertiaryHashvalue = (secondHashvalue + 1) % Constant.hashBase ;*/
 			
-			if (primaryHashValue.equals(nodeId)) {
+			/*if (primaryHashValue.equals(nodeId)) {
 				returnObject = this.primaryObjects.get(key); 
 			} else if (secondHashvalue.equals(nodeId)) {
 				returnObject = this.secondaryObjects.get(key); 
 			} else if (tertiaryHashvalue.equals(nodeId)){
 				returnObject = this.tertiaryObjects.get(key);
-			}
+			}*/
+			returnObject = this.objectsStorage.get(key);
 		}
 
 		MessageObject newMessage = new MessageObject();

@@ -40,7 +40,7 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializabl
 		for (int i = 0; i < this.timeVector.length; i++) {
 			if (this.timeVector[i] < o.getTimeVector()[i]) {
 				return -1;
-			} else if (this.timeVector[i] < o.getTimeVector()[i]) {
+			} else if (this.timeVector[i] > o.getTimeVector()[i]) {
 				return 1;
 			}
 		}
@@ -94,13 +94,17 @@ public class VectorTimestamp implements Comparable<VectorTimestamp>, Serializabl
 		
 		Random rand = new Random();
 		
-		Integer [] av = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
-		Integer [] bv = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
+//		Integer [] av = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
+//		Integer [] bv = new Integer[] {rand.nextInt(1000), rand.nextInt(1000), rand.nextInt(1000)};
+
+		Integer [] av = new Integer[] {18,14,25};
+		Integer [] bv = new Integer[] {14,24,16};
 		
 		a.setTimeVector(av);
 		b.setTimeVector(bv);
 		
 		System.out.println("A " + a.printTimestamp() + " compares B " + b.printTimestamp() + " is " + a.compareTo(b));
+		System.out.println("B " + b.printTimestamp() + " compares A " + a.printTimestamp() + " is " + b.compareTo(a));
 		
 	}
 

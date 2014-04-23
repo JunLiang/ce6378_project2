@@ -12,12 +12,15 @@ public class MessageObject implements Serializable{
 	private ContentObject contentObject;
 	private Integer fromServerId;
 	private VectorTimestamp timestamp;
+	
+	private Integer serverMessagesExchanged;
 			
 	public  MessageObject () {
 		fromServerId = -1;
 		contentObject = null;
 		messageType = MessageType.SERVER_UNAVAILABLE;
 		timestamp = new VectorTimestamp (Constant.numberOfServers);
+		setServerMessagesExchanged(0);
 	}
 
 	public VectorTimestamp getTimestamp() {
@@ -57,9 +60,18 @@ public class MessageObject implements Serializable{
 		
 		a.append("Message[").append(this.getMessageType()).append(", ")
 		.append(this.getFromServerId()).append(",").append(this.getContentObject() == null ? null : this.getContentObject().printContentObject())
-		.append(", ").append(this.getTimestamp().printTimestamp()).append("]");
+		.append(", ").append(this.getTimestamp().printTimestamp())
+		.append(" messages exchanged among servers ").append(this.getServerMessagesExchanged()).append("]");
 		
 		return a.toString();
+	}
+
+	public Integer getServerMessagesExchanged() {
+		return serverMessagesExchanged;
+	}
+
+	public void setServerMessagesExchanged(Integer serverMessagesExchanged) {
+		this.serverMessagesExchanged = serverMessagesExchanged;
 	}
 
 }
