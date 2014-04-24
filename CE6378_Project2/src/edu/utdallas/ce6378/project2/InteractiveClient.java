@@ -227,7 +227,7 @@ public class InteractiveClient {
 									lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
 									lresponseTime = lendTime - lbeginTime;
 									
-									System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime + "ms");
+									System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime + "ms" +" Exchanged Messages=" + RecvMessage.getServerMessagesExchanged());
 									
 								}
 								else if(Cli_Operation_Type.equals("get")) //Read an object from a server
@@ -305,7 +305,7 @@ public class InteractiveClient {
 										
 										lendTime = System.currentTimeMillis();//get system time at the beginning of an operation
 										lresponseTime = lendTime - lbeginTime;
-										System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime +"ms");
+										System.out.println("\n Put Operation Result: " + " MsgType=" + RecvMessage.getMessageType() + " ResponseTime=" + lresponseTime +"ms" +" Exchanged Messages=" + RecvMessage.getServerMessagesExchanged());
 
 									}
 									catch (IOException e) 
