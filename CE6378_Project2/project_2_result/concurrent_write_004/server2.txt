@@ -1,0 +1,1 @@
+Server 2 can not store object 0 at time timestamp[656 657 665 0 0 0 0 ] as consensus can not be reached.

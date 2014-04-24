@@ -1,0 +1,161 @@
+Node Id :0 read 7 server nodes 5 client nodes.
+Server 0 buffer object ContentObject [0, 61895, , timestamp[1 0 0 ]] at time timestamp[1 0 0 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[2 0 2 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[4 2 2 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[6 2 5 0 0 0 0 ] for commit object 0 results ok.
+Server 0 polled server 1 at time timestamp[8 5 5 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 61895, , timestamp[1 0 0 ]] at time timestamp[9 5 5 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 83984, , timestamp[11 5 5 ]] at time timestamp[11 5 5 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[12 5 8 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[14 8 8 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[16 8 11 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 99423, , timestamp[15 10 8 ]] at time timestamp[19 8 11 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[20 15 13 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 83984, , timestamp[11 5 5 ]] at time timestamp[21 15 13 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 74926, , timestamp[24 17 13 ]] at time timestamp[24 17 13 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[25 17 19 0 0 0 0 ] for writing object 0 results ok.
+Server 0 store ContentObject [0, 99423, , timestamp[15 10 8 ]] at time timestamp[28 17 19 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[30 23 19 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[32 23 25 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 43425, , timestamp[29 25 19 ]] at time timestamp[35 23 25 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[37 32 25 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 74926, , timestamp[24 17 13 ]] at time timestamp[38 32 25 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 76727, , timestamp[40 32 25 ]] at time timestamp[40 32 25 0 0 0 0 ]
+Server 0 store ContentObject [0, 43425, , timestamp[29 25 19 ]] at time timestamp[42 32 25 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[43 35 32 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[46 40 32 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[48 40 37 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 40050, , timestamp[43 41 29 ]] at time timestamp[51 40 37 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[53 48 37 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 76727, , timestamp[40 32 25 ]] at time timestamp[54 48 37 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 55484, , timestamp[56 48 37 ]] at time timestamp[56 48 37 0 0 0 0 ]
+Server 0 store ContentObject [0, 40050, , timestamp[43 41 29 ]] at time timestamp[58 48 37 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[59 51 44 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[62 56 44 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[64 56 49 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 17903, , timestamp[59 57 41 ]] at time timestamp[67 56 49 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[69 64 49 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 55484, , timestamp[56 48 37 ]] at time timestamp[70 64 49 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 88148, , timestamp[72 64 49 ]] at time timestamp[72 64 49 0 0 0 0 ]
+Server 0 store ContentObject [0, 17903, , timestamp[59 57 41 ]] at time timestamp[74 64 49 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[75 67 56 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[78 72 56 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[80 72 61 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 34499, , timestamp[75 73 53 ]] at time timestamp[83 72 61 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[85 80 61 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 88148, , timestamp[72 64 49 ]] at time timestamp[86 80 61 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 96859, , timestamp[88 80 61 ]] at time timestamp[88 80 61 0 0 0 0 ]
+Server 0 store ContentObject [0, 34499, , timestamp[75 73 53 ]] at time timestamp[90 80 61 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[91 83 68 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[94 88 68 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[96 88 73 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 9884, , timestamp[91 89 65 ]] at time timestamp[99 88 73 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[101 96 73 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 96859, , timestamp[88 80 61 ]] at time timestamp[102 96 73 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 15549, , timestamp[104 96 73 ]] at time timestamp[104 96 73 0 0 0 0 ]
+Server 0 store ContentObject [0, 9884, , timestamp[91 89 65 ]] at time timestamp[106 96 73 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[107 99 80 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[110 104 80 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[112 104 85 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 74481, , timestamp[107 105 77 ]] at time timestamp[115 104 85 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[117 112 85 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 15549, , timestamp[104 96 73 ]] at time timestamp[118 112 85 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 10564, , timestamp[120 112 85 ]] at time timestamp[120 112 85 0 0 0 0 ]
+Server 0 store ContentObject [0, 74481, , timestamp[107 105 77 ]] at time timestamp[122 112 85 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[123 115 92 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[126 120 92 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[128 120 97 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 17413, , timestamp[123 121 89 ]] at time timestamp[131 120 97 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[133 128 97 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 10564, , timestamp[120 112 85 ]] at time timestamp[134 128 97 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 32506, , timestamp[136 128 97 ]] at time timestamp[136 128 97 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[137 131 104 0 0 0 0 ] for writing object 0 results ok.
+Server 0 store ContentObject [0, 17413, , timestamp[123 121 89 ]] at time timestamp[140 131 104 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[142 136 104 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[144 136 109 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 58416, , timestamp[141 137 104 ]] at time timestamp[147 136 109 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[149 144 109 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 32506, , timestamp[136 128 97 ]] at time timestamp[150 144 109 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 80476, , timestamp[152 144 109 ]] at time timestamp[152 144 109 0 0 0 0 ]
+Server 0 store ContentObject [0, 58416, , timestamp[141 137 104 ]] at time timestamp[154 144 109 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[155 147 116 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[158 152 116 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[160 152 121 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 32990, , timestamp[155 153 113 ]] at time timestamp[163 152 121 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[164 159 121 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 80476, , timestamp[152 144 109 ]] at time timestamp[165 159 121 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 36777, , timestamp[168 161 121 ]] at time timestamp[168 161 121 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[169 161 127 0 0 0 0 ] for writing object 0 results ok.
+Server 0 store ContentObject [0, 32990, , timestamp[155 153 113 ]] at time timestamp[172 161 127 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[174 168 127 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[176 168 133 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 36259, , timestamp[173 169 127 ]] at time timestamp[179 168 133 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[180 175 133 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 36777, , timestamp[168 161 121 ]] at time timestamp[181 175 133 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 87174, , timestamp[184 176 133 ]] at time timestamp[184 176 133 0 0 0 0 ]
+Server 0 store ContentObject [0, 36259, , timestamp[173 169 127 ]] at time timestamp[186 176 133 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[187 179 140 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[190 184 140 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[192 184 145 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 95732, , timestamp[187 185 137 ]] at time timestamp[195 184 145 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[197 192 145 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 87174, , timestamp[184 176 133 ]] at time timestamp[198 192 145 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 93105, , timestamp[200 192 145 ]] at time timestamp[200 192 145 0 0 0 0 ]
+Server 0 store ContentObject [0, 95732, , timestamp[187 185 137 ]] at time timestamp[202 192 145 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[203 195 152 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[206 200 152 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[208 200 157 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 86767, , timestamp[203 201 149 ]] at time timestamp[211 200 157 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[213 208 157 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 93105, , timestamp[200 192 145 ]] at time timestamp[214 208 157 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 86383, , timestamp[216 208 157 ]] at time timestamp[216 208 157 0 0 0 0 ]
+Server 0 store ContentObject [0, 86767, , timestamp[203 201 149 ]] at time timestamp[218 208 157 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[219 211 164 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[222 216 164 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[224 216 169 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 9243, , timestamp[219 217 161 ]] at time timestamp[227 216 169 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[228 223 169 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 86383, , timestamp[216 208 157 ]] at time timestamp[229 223 169 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 21449, , timestamp[232 224 169 ]] at time timestamp[232 224 169 0 0 0 0 ]
+Server 0 store ContentObject [0, 9243, , timestamp[219 217 161 ]] at time timestamp[234 224 169 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[235 227 176 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[238 232 176 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[240 232 181 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 59743, , timestamp[235 233 173 ]] at time timestamp[243 232 181 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[245 240 181 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 21449, , timestamp[232 224 169 ]] at time timestamp[246 240 181 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 38813, , timestamp[248 240 181 ]] at time timestamp[248 240 181 0 0 0 0 ]
+Server 0 store ContentObject [0, 59743, , timestamp[235 233 173 ]] at time timestamp[250 240 181 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[251 243 188 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[254 248 188 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 2 at time timestamp[256 248 193 0 0 0 0 ] for commit object 0 results ok.
+Server 0 buffer object ContentObject [0, 3891, , timestamp[251 249 185 ]] at time timestamp[259 248 193 0 0 0 0 ]
+Server 0 polled server 1 at time timestamp[261 256 193 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 38813, , timestamp[248 240 181 ]] at time timestamp[262 256 193 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 52714, , timestamp[264 256 193 ]] at time timestamp[264 256 193 0 0 0 0 ]
+Server 0 store ContentObject [0, 3891, , timestamp[251 249 185 ]] at time timestamp[266 256 193 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[267 259 200 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[270 264 200 0 0 0 0 ] for writing object 0 results ok.
+Server 0 buffer object ContentObject [0, 45344, , timestamp[267 265 197 ]] at time timestamp[273 264 200 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[274 268 206 0 0 0 0 ] for commit object 0 results ok.
+Server 0 polled server 1 at time timestamp[277 273 206 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 52714, , timestamp[264 256 193 ]] at time timestamp[278 273 206 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 65785, , timestamp[280 273 206 ]] at time timestamp[280 273 206 0 0 0 0 ]
+Server 0 store ContentObject [0, 45344, , timestamp[267 265 197 ]] at time timestamp[282 273 206 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[284 277 212 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[286 282 212 0 0 0 0 ] for writing object 0 results ok.
+Server 0 buffer object ContentObject [0, 49821, , timestamp[283 279 209 ]] at time timestamp[289 282 212 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[290 284 218 0 0 0 0 ] for commit object 0 results ok.
+Server 0 polled server 1 at time timestamp[293 289 218 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 65785, , timestamp[280 273 206 ]] at time timestamp[294 289 218 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 68615, , timestamp[296 289 218 ]] at time timestamp[296 289 218 0 0 0 0 ]
+Server 0 store ContentObject [0, 49821, , timestamp[283 279 209 ]] at time timestamp[298 289 218 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[300 293 224 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[302 298 224 0 0 0 0 ] for writing object 0 results ok.
+Server 0 buffer object ContentObject [0, 33658, , timestamp[299 295 221 ]] at time timestamp[305 298 224 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[306 300 230 0 0 0 0 ] for commit object 0 results ok.
+Server 0 polled server 1 at time timestamp[309 305 230 0 0 0 0 ] for commit object 0 results ok.
+Server 0 store ContentObject [0, 68615, , timestamp[296 289 218 ]] at time timestamp[310 305 230 0 0 0 0 ]
+Server 0 store ContentObject [0, 33658, , timestamp[299 295 221 ]] at time timestamp[312 305 230 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 46674, , timestamp[313 311 233 ]] at time timestamp[315 309 233 0 0 0 0 ]
+Server 0 store ContentObject [0, 46674, , timestamp[313 311 233 ]] at time timestamp[318 315 236 0 0 0 0 ]

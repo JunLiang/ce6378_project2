@@ -1,0 +1,11 @@
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 5 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 7 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 9 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 11 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 13 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 15 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 17 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 19 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 21 ] as consensus can not be reached.
+Server 6 can not store object 6 at time timestamp[0 0 0 0 0 0 23 ] as consensus can not be reached.
+
