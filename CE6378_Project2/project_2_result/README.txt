@@ -15,3 +15,5 @@ file: all_nodes.cfg  -- This is the configuration file of our server nodes and c
 file: simulation_server.sh -- This is the shell script that starts all the configured servers on different netxx servers
 
 file:kill_net.sh -- This is the shell script that logs onto the netxx servers to clean up the server process. 
+
+file:typescript -- This is the script capture of the client session.
