@@ -22,16 +22,16 @@ public class AutomatedClient {
 		
 	}
 	
-	public void simulate() {
+	public void simulate(Integer objectId) {
 		//Wait for all server to come online first
 		//sleep for a few seconds here.
 		
 		try {
 			Thread.sleep(6000);			
 			
-			Thread clientThread0 = new Thread(new ClientThread(0));
-			Thread clientThread1 = new Thread(new ClientThread(1));
-			Thread clientThread2 = new Thread(new ClientThread(2));
+			Thread clientThread0 = new Thread(new ClientThread(0, objectId));
+			Thread clientThread1 = new Thread(new ClientThread(1,objectId));
+			Thread clientThread2 = new Thread(new ClientThread(2,objectId));
 			clientThread0.start();
 			clientThread1.start();
 			clientThread2.start();
@@ -77,12 +77,14 @@ public class AutomatedClient {
 		HashMap<Integer, Socket> serverSockets ;
 		HashMap<Integer, ObjectOutputStream> writeToServerPipes;
 		HashMap<Integer, ObjectInputStream> readFromServerPipes;
+		private Integer objectKey;
 		
-		public ClientThread(Integer server) {
+		public ClientThread(Integer server, Integer objectId) {
 			this.serverChoice = server;
 			serverSockets = new HashMap<Integer, Socket> ();
 			writeToServerPipes = new HashMap<Integer, ObjectOutputStream> ();
 			readFromServerPipes = new HashMap<Integer, ObjectInputStream> ();
+			objectKey = objectId;
 		}
 		
 		private void establishConnectionToServers() throws UnknownHostException, IOException {
@@ -119,7 +121,7 @@ public class AutomatedClient {
 
 			while (round < 100) {
 			
-				Integer key = 0;//randGen.nextInt(Constant.objectKeyRange);
+				Integer key = this.objectKey;//randGen.nextInt(Constant.objectKeyRange);
 				Integer intValue = randGen.nextInt(Constant.objectValueRange);
 				//use guid as random string value
 				String strValue = java.util.UUID.randomUUID().toString();

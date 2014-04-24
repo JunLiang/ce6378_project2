@@ -336,6 +336,9 @@ public class ContentServer {
 		VectorTimestamp timestamp = thisObject.getTimestamp();
 		Integer key = thisObject.getObjId();
 		
+		/*Flushing the buffered versions of the same object id and 
+		 * time stamp <= thisObject's timestamp
+		 */
 		TreeMap<VectorTimestamp, ContentObject> objBuffer = this.bufferStorage.get(key);
 		
 			if (objBuffer != null) {
@@ -371,6 +374,7 @@ public class ContentServer {
 		}*/
 	}
 	
+	//Add the pending object to the buffer, and it will be flushed when the write commits.
 	private synchronized void addContentObjectToBuffer(ContentObject contentObject) {
 		TreeMap<VectorTimestamp, ContentObject> objBuffer = this.bufferStorage.get(contentObject.getObjId());
 		

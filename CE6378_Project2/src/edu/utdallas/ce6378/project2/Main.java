@@ -105,7 +105,12 @@ public class Main {
 					localNode = new AutomatedClient(localNodeConfig);
 					//InteractiveClient localNode;
 					//localNode = new InteractiveClient(localNodeConfig);
-					localNode.simulate();
+					Integer objectId = 0;
+					
+					if (args.length == 2) {
+						objectId = Integer.valueOf(args[1]);
+					}
+					localNode.simulate(objectId);
 				} else {
 					//ContentClient localNode;
 					//localNode = new ContentClient(localNodeConfig);
