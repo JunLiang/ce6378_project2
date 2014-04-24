@@ -1,0 +1,7 @@
+{net07:~} /usr/local/bin/java -Xmx1024m  -classpath /home/004/j/jx/jxl130131/CE6378_Project2/bin edu.utdallas.ce6378.project2.Main -1
+Node Id :-1 read 7 server nodes 5 client nodes.
+FAIL,1
+Message[SERVER_UNAVAILABLE, 1,null, timestamp[0 1 0 0 0 0 0 ] messages exchanged among servers 0]
+FAIL,2
+Message[SERVER_UNAVAILABLE, 2,null, timestamp[7 0 9 0 0 0 0 ] messages exchanged among servers 0]
+

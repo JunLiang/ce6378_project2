@@ -1,0 +1,11 @@
+Node Id :0 read 7 server nodes 5 client nodes.
+Server 0 buffer object ContentObject [0, 200, , timestamp[1 0 0 ]] at time timestamp[1 0 0 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[2 0 2 0 0 0 0 ] for writing object 0 results ok.
+Server 0 polled server 1 at time timestamp[4 0 2 0 0 0 0 ] for writing object 0 results failed.
+Server 0 polled server 2 at time timestamp[6 0 5 0 0 0 0 ] for commit object 0 results ok.
+Server 0 polled server 1 at time timestamp[8 0 5 0 0 0 0 ] for commit object 0 results failed.
+Server 0 store ContentObject [0, 200, , timestamp[1 0 0 ]] at time timestamp[9 0 5 0 0 0 0 ]
+Server 0 buffer object ContentObject [0, 300, , timestamp[13 0 5 ]] at time timestamp[13 0 5 0 0 0 0 ]
+Server 0 polled server 2 at time timestamp[14 0 5 0 0 0 0 ] for writing object 0 results failed.
+Server 0 polled server 1 at time timestamp[16 0 5 0 0 0 0 ] for writing object 0 results failed.
+Server 0 can not store object 0 at time timestamp[17 0 5 0 0 0 0 ] as consensus can not be reached.
