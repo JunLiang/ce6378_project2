@@ -1,0 +1,34 @@
+{net07:~} /usr/local/bin/java -Xmx1024m  -classpath /home/004/j/jx/jxl130131/CE6378_Project2/bin edu.utdallas.ce6378.project2.Main -1
+Node Id :-1 read 7 server nodes 5 client nodes.
+ISOLATE,1,2
+Server_1: 0 Server_2: 1
+Message[SERVER_CUT_OFF_OK, 1,null, timestamp[0 2 0 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 0,null, timestamp[2 0 0 0 0 0 0 ] messages exchanged among servers 0]
+Server_1: 0 Server_2: 2
+Message[SERVER_CUT_OFF_OK, 2,null, timestamp[0 0 2 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 0,null, timestamp[4 0 0 0 0 0 0 ] messages exchanged among servers 0]
+Server_1: 3 Server_2: 1
+Message[SERVER_CUT_OFF_OK, 1,null, timestamp[0 4 0 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 3,null, timestamp[0 0 0 2 0 0 0 ] messages exchanged among servers 0]
+Server_1: 3 Server_2: 2
+Message[SERVER_CUT_OFF_OK, 2,null, timestamp[0 0 4 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 3,null, timestamp[0 0 0 4 0 0 0 ] messages exchanged among servers 0]
+Server_1: 4 Server_2: 1
+Message[SERVER_CUT_OFF_OK, 1,null, timestamp[0 6 0 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 4,null, timestamp[0 0 0 0 2 0 0 ] messages exchanged among servers 0]
+Server_1: 4 Server_2: 2
+Message[SERVER_CUT_OFF_OK, 2,null, timestamp[0 0 6 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 4,null, timestamp[0 0 0 0 4 0 0 ] messages exchanged among servers 0]
+Server_1: 5 Server_2: 1
+Message[SERVER_CUT_OFF_OK, 1,null, timestamp[0 8 0 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 5,null, timestamp[0 0 0 0 0 2 0 ] messages exchanged among servers 0]
+Server_1: 5 Server_2: 2
+Message[SERVER_CUT_OFF_OK, 2,null, timestamp[0 0 8 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 5,null, timestamp[0 0 0 0 0 4 0 ] messages exchanged among servers 0]
+Server_1: 6 Server_2: 1
+Message[SERVER_CUT_OFF_OK, 1,null, timestamp[0 10 0 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 6,null, timestamp[0 0 0 0 0 0 2 ] messages exchanged among servers 0]
+Server_1: 6 Server_2: 2
+Message[SERVER_CUT_OFF_OK, 2,null, timestamp[0 0 10 0 0 0 0 ] messages exchanged among servers 0]
+Message[SERVER_CUT_OFF_OK, 6,null, timestamp[0 0 0 0 0 0 4 ] messages exchanged among servers 0]
+

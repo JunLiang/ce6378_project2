@@ -1,0 +1,11 @@
+Node Id :1 read 7 server nodes 5 client nodes.
+Server 1 buffer object ContentObject [0, 100, , timestamp[1 0 0 ]] at time timestamp[0 1 0 0 0 0 0 ]
+Server 1 store ContentObject [0, 100, , timestamp[1 0 0 ]] at time timestamp[5 4 2 0 0 0 0 ]
+Server 1 buffer object ContentObject [1, 300, , timestamp[7 5 0 ]] at time timestamp[9 7 5 0 0 0 0 ]
+Server 1 polled server 3 at time timestamp[9 8 5 2 0 0 0 ] for writing object 1 results ok.
+Server 1 polled server 2 at time timestamp[9 10 8 2 0 0 0 ] for writing object 1 results ok.
+Server 1 polled server 3 at time timestamp[9 12 8 5 0 0 0 ] for commit object 1 results ok.
+Server 1 polled server 2 at time timestamp[9 14 11 5 0 0 0 ] for commit object 1 results ok.
+Server 1 store ContentObject [1, 300, , timestamp[7 5 0 ]] at time timestamp[9 15 11 5 0 0 0 ]
+Server 1 buffer object ContentObject [6, 420, , timestamp[1 0 0 ]] at time timestamp[9 19 11 5 0 0 0 ]
+Server 1 store ContentObject [6, 420, , timestamp[1 0 0 ]] at time timestamp[9 22 11 5 0 0 3 ]

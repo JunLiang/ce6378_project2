@@ -1,0 +1,47 @@
+Script started on Wed 23 Apr 2014 07:52:40 PM CDT
+[?1034h{net08:~} /usr/local/bin/java -Xmx1024m  -classpath /home/004/j/jx/jxl130131/CE6 378_Project2/bin edu.utdallas.ce6378.project2.Main 7
+Node Id :7 read 7 server nodes 5 client nodes.
+User Input: a,put,9,2000
+[debug]Cli_Operation_Type is put
+
+ [debug]writeServerId = 2
+
+ [debug]Client send msg:  MsgType=CLIENT_PUT_OBJECT ObjId=9 ObjValue=2000
+
+ Put Operation Result:  MsgType=SERVER_TO_CLIENT_PUT_OK ResponseTime=465ms
+User Input: b,get,9
+ Cli_Server_Index=b Cli_Operation_Type=get Cli_Object_Key=9
+[debug]Cli_Operation_Type is Get
+[debug]writeServerId = 3
+
+ [debug]Client send msg:  MsgType=CLIENT_GET_OBJECT ObjId=9
+
+ Get Operation Result: MsgType= SERVER_TO_CLIENT_READ_OK ObjId=9 ObjValue=2000 ResponseTime=44ms
+User Input: c,put,j 0,888
+[debug]Cli_Operation_Type is put
+
+ [debug]writeServerId = 2
+
+ [debug]Client send msg:  MsgType=CLIENT_PUT_OBJECT ObjId=0 ObjValue=888
+
+ Put Operation Result:  MsgType=SERVER_TO_CLIENT_PUT_OK ResponseTime=399ms
+User Input: a,get,0
+ Cli_Server_Index=a Cli_Operation_Type=get Cli_Object_Key=0
+[debug]Cli_Operation_Type is Get
+[debug]writeServerId = 0
+
+ [debug]Client send msg:  MsgType=CLIENT_GET_OBJECT ObjId=0
+
+ Get Operation Result: MsgType= SERVER_TO_CLIENT_READ_OK ObjId=0 ObjValue=888 ResponseTime=45ms
+User Input: b,get,0
+ Cli_Server_Index=b Cli_Operation_Type=get Cli_Object_Key=0
+[debug]Cli_Operation_Type is Get
+[debug]writeServerId = 1
+
+ [debug]Client send msg:  MsgType=CLIENT_GET_OBJECT ObjId=0
+
+ Get Operation Result: MsgType= SERVER_TO_CLIENT_READ_OK ObjId=0 ObjValue=888 ResponseTime=49ms
+User Input: {net08:~} exit
+exit
+
+Script done on Wed 23 Apr 2014 07:53:40 PM CDT

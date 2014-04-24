@@ -1,0 +1,3 @@
+Node Id :3 read 7 server nodes 5 client nodes.
+Server 3 buffer object ContentObject [1, 300, , timestamp[7 5 0 ]] at time timestamp[0 0 0 1 0 0 0 ]
+Server 3 store ContentObject [1, 300, , timestamp[7 5 0 ]] at time timestamp[9 9 5 4 0 0 0 ]
